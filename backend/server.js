@@ -21,6 +21,8 @@ app.get('/api/health', async (req, res, next) => {
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/tables', require('./routes/tables'));
 
 // Unknown path
 app.use((req, res) => {
