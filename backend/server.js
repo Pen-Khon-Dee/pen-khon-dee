@@ -21,8 +21,9 @@ app.get('/api/health', async (req, res, next) => {
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
-app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tables', require('./routes/tables'));
+app.use('/api/categories', require('./routes/categories'));
+app.use('/api/menu', require('./routes/menu'));
 
 // Unknown path
 app.use((req, res) => {
