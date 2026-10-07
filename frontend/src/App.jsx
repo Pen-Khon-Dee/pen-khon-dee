@@ -1,0 +1,58 @@
+import { useEffect } from 'react';
+import { Link, Route, Routes, useLocation } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import Home from './pages/Home';
+import Menu from './pages/Menu';
+import Reservation from './pages/Reservation';
+import Register from './pages/Register';
+import Login from './pages/Login';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
+function NotFound() {
+  return (
+    <section className="band band--grey">
+      <div className="container">
+        <h1 className="display">404 - Page Not Found</h1>
+        <p className="prose" style={{ marginTop: '1rem' }}>
+          The page you are looking for does not exist or has been moved.
+        </p>
+        <p style={{ marginTop: '2rem' }}>
+          <Link to="/" className="btn btn--dark">
+            Go to Home
+          </Link>
+        </p>
+      </div>
+    </section>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <a href="#main" className="skip">
+        ข้ามไปยังเนื้อหา
+      </a>
+      <ScrollToTop />
+      <Navbar />
+      <main id="main">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/menu" element={<Menu />} />
+          <Route path="/reservation" element={<Reservation />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      <Footer />
+    </>
+  );
+}
