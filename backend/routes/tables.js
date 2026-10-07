@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../db');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const { SEATING_MINUTES, WARNING_MINUTES } = require('../config');
+const { getBill } = require('../services/orders');
 
 const router = express.Router();
 
@@ -46,6 +47,26 @@ router.get('/', requireAuth, requireRole('Cashier'), async (req, res, next) => {
     });
 
     res.json(tables);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/tables/:number/order : the open order (bill) of a table (Cashier and Server)
+router.get('/:number/order', requireAuth, async (req, res, next) => {
+  try {
+    const [[row]] = await pool.query(
+      `SELECT o.order_id
+         FROM dining_table t
+         JOIN order_table ot ON ot.table_id = t.table_id
+         JOIN orders o       ON o.order_id = ot.order_id
+        WHERE t.table_number = ? AND o.order_status = 'Open'`,
+      [req.params.number]
+    );
+    if (!row) {
+      return res.status(404).json({ error: `Table ${req.params.number} has no open order` });
+    }
+    res.json(await getBill(pool, row.order_id));
   } catch (err) {
     next(err);
   }
