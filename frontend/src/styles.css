@@ -1,23 +1,22 @@
 /* ==========================================================
    Osteria Nero — คลาสสิก เรียบหรู ทันสมัย
    พาเลตต์: Vanilla Silk, Alpine Oat, Warm Greige, Cherry Velvet, Bordeaux Noir
-   ฟอนต์: Bodoni Moda (หัวข้อ, ตระกูลเดียวกับแบบอักษรจากเมืองปาร์ม่า)
-          Jost (เนื้อหา), Noto Sans/Serif Thai (ภาษาไทย)
+   ฟอนต์: Playfair Display (หัวข้อ), DM Sans (เนื้อหา)
    ========================================================== */
 
 :root {
-  --nero: #351a20;
-  --carbone: #552326;
-  --grafite: #714447;
-  --piombo: #897970;
-  --cenere: #d0bfb2;
-  --marmo: #e8dccd;
-  --bianco: #f7efe4;
-  --muted-on-dark: #d8c8b9;
+  --nero: #211f1d;
+  --carbone: #393633;
+  --grafite: #d8d3cc;
+  --piombo: #7b7771;
+  --cenere: #ded9d2;
+  --marmo: #f0ede8;
+  --bianco: #fbfaf7;
+  --muted-on-dark: #e6ded4;
   --error: #923d45;
 
-  --serif: 'Bodoni Moda', 'Noto Serif Thai', Didot, 'Times New Roman', serif;
-  --sans: 'Jost', 'Noto Sans Thai', system-ui, sans-serif;
+  --serif: 'Playfair Display', serif;
+  --sans: 'DM Sans', sans-serif;
 
   --gutter: clamp(0.75rem, 3vw, 2rem);
   --max: 1180px;
@@ -171,8 +170,8 @@ textarea {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--nero);
-  color: var(--bianco);
+  background: var(--bianco);
+  color: var(--nero);
   border-bottom: 1px solid var(--grafite);
 }
 .nav__inner {
@@ -181,35 +180,41 @@ textarea {
   align-items: center;
   gap: 1.5rem;
   min-height: var(--nav-h);
+    max-width: none;
+  margin-inline: 0;
+  padding-inline: clamp(1rem, 3vw, 2.5rem);
 }
 .nav__search {
   grid-column: 1;
   display: flex;
   width: min(100%, 14rem);
   min-width: 0;
-  border: 1px solid var(--piombo);
+  border: 1px solid var(--cenere);
+}
+.nav nav {
+  font-family: var(--sans);
 }
 .nav__search input {
   width: 100%;
   min-width: 0;
   padding: 0.45rem 0.7rem;
-  color: var(--bianco);
+  color: var(--nero);
   background: transparent;
   border: 0;
   outline: 0;
   font-size: 0.9rem;
 }
 .nav__search input::placeholder {
-  color: var(--muted-on-dark);
+  color: var(--piombo);
   opacity: 0.85;
 }
 .nav__search input:focus-visible {
-  outline: 2px solid var(--bianco);
+  outline: 2px solid var(--nero);
   outline-offset: -2px;
 }
 .nav__search button {
   flex: 0 0 2.5rem;
-  color: var(--bianco);
+  color: var(--nero);
   background: transparent;
   border: 0;
   cursor: pointer;
@@ -224,6 +229,12 @@ textarea {
   font-size: 1.625rem;
   line-height: 1;
   text-decoration: none;
+}
+.nav .brand {
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.12em;
 }
 .nav__menu {
   grid-column: 3;
@@ -241,15 +252,15 @@ textarea {
   padding: 0.25rem 0;
   font-size: 0.95rem;
   text-decoration: none;
-  color: var(--muted-on-dark);
+  color: var(--piombo);
   border-bottom: 1px solid transparent;
 }
 .nav__link:hover {
-  color: var(--bianco);
+  color: var(--nero);
 }
 .nav__link.active {
-  color: var(--bianco);
-  border-bottom-color: var(--bianco);
+  color: var(--nero);
+  border-bottom-color: var(--nero);
 }
 .nav__auth {
   display: flex;
@@ -258,19 +269,31 @@ textarea {
 }
 .nav__user {
   font-size: 0.9rem;
-  color: var(--muted-on-dark);
+  color: var(--piombo);
+}
+.nav .btn--light {
+  color: var(--bianco);
+  background: var(--nero);
+  border-color: var(--nero);
+}
+.nav .btn--light:hover {
+  color: var(--nero);
+  background: transparent;
 }
 .nav__toggle {
   display: none;
   padding: 0.4rem 0.9rem;
   background: transparent;
-  color: var(--bianco);
+  color: var(--nero);
   border: 1px solid var(--piombo);
   cursor: pointer;
   font-size: 0.9rem;
 }
 
 @media (max-width: 860px) {
+  .dishes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .nav__inner {
     grid-template-rows: auto auto;
     gap: 0.65rem 1rem;
@@ -303,7 +326,7 @@ textarea {
     align-items: flex-start;
     gap: 1.5rem;
     padding: 1.5rem var(--gutter) 2rem;
-    background: var(--nero);
+    background: var(--bianco);
     border-bottom: 1px solid var(--grafite);
   }
   .nav__menu.is-open {
@@ -573,13 +596,14 @@ textarea {
 
 /* ---------- Page head ---------- */
 .page-head {
-  background: var(--nero);
-  color: var(--bianco);
-  padding-block: clamp(3rem, 7vw, 5.5rem);
+  background: var(--bianco);
+  color: var(--nero);
+  padding-block: clamp(5rem, 11vw, 9rem);
+  text-align: center;
 }
 .page-head__title {
   font-family: var(--serif);
-  font-style: italic;
+  font-style: normal;
   font-weight: 400;
   font-size: clamp(2.75rem, 6vw, 4.75rem);
   line-height: 1.05;
@@ -588,7 +612,8 @@ textarea {
 .page-head__lead {
   max-width: 36rem;
   margin-top: 1.25rem;
-  color: var(--muted-on-dark);
+  margin-inline: auto;
+  color: var(--piombo);
 }
 
 /* ---------- Menu ---------- */
@@ -601,7 +626,7 @@ textarea {
 }
 .menu-tabs__list {
   display: flex;
-  gap: 2rem;
+  gap: clamp(0.75rem, 2vw, 2rem);
   overflow-x: auto;
 }
 .menu-tab {
@@ -618,7 +643,9 @@ textarea {
   color: var(--nero);
 }
 .menu-tab[aria-pressed='true'] {
-  color: var(--nero);
+  padding-inline: 1rem;
+  color: var(--bianco);
+  background: var(--nero);
   font-weight: 500;
   border-bottom-color: var(--nero);
 }
@@ -627,16 +654,23 @@ textarea {
   font-weight: 500;
   font-size: clamp(2rem, 4vw, 3rem);
   line-height: 1.1;
+  text-align: center;
 }
 .menu-section__note {
   margin-top: 0.5rem;
   color: var(--piombo);
+  text-align: center;
 }
 .dishes {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2.25rem clamp(2rem, 6vw, 5rem);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
   margin-top: 2.5rem;
+}
+.dish {
+  min-width: 0;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  background: #eeebe6;
 }
 .dish__row {
   display: flex;
@@ -652,14 +686,14 @@ textarea {
 .dish__leader {
   flex: 1;
   min-width: 1rem;
-  border-bottom: 1px dotted var(--piombo);
+  border-bottom: 1px solid var(--cenere);
   transform: translateY(-0.3rem);
 }
 .dish__desc {
   margin-top: 0.35rem;
   font-size: 0.98rem;
   line-height: 1.65;
-  color: #65524c;
+  color: #67635e;
 }
 .dish__tag {
   display: inline-block;
@@ -868,7 +902,7 @@ textarea.field__control {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 560px) {
   .dishes {
     grid-template-columns: 1fr;
   }

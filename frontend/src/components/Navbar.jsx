@@ -33,8 +33,8 @@ export default function Navbar() {
         >
           <input
             type="search"
-            aria-label="ค้นหาเมนูอาหาร"
-            placeholder="ค้นหาเมนู..."
+            aria-label="find menu"
+            placeholder="Find menu..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
