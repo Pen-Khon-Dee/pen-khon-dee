@@ -27,6 +27,7 @@ app.use('/api/menu', require('./routes/menu'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/order-items', require('./routes/orderItems'));
 app.use('/api/kitchen', require('./routes/kitchen'));
+app.use('/api/reservations', require('./routes/reservations'));
 
 // Unknown path
 app.use((req, res) => {
