@@ -11,15 +11,14 @@ export default function Home() {
           <div>
             <h1 className="hero__title">A tavola, senza fretta.</h1>
             <p className="hero__lead">
-              มาถึงโต๊ะอย่างไม่เร่งรีบ ปาสต้าทำสดทุกเช้า พิซซ่าจากเตาฟืน
-              และไวน์ที่คัดมาให้เข้ากับทุกจาน
+              We believe that good Italian food starts with a few really good ingredients. Freshly made pasta, slow-cooked sauces, and pizza dough fermented for 48 hours before going into the wood-fired oven.
             </p>
             <div className="hero__actions">
               <Link to="/reservation" className="btn btn--light">
-                จองโต๊ะ
+                reserve a table
               </Link>
               <Link to="/menu" className="btn btn--ghost-light">
-                ดูเมนู
+                view menu
               </Link>
             </div>
           </div>
@@ -27,7 +26,7 @@ export default function Home() {
           <div className="plate">
             <div className="plate__body">
               <p className="plate__title">Aperto ogni sera</p>
-              <p className="plate__sub">เปิดทุกวัน 17:30 – 23:00</p>
+              <p className="plate__sub">Open every evening 17:30 – 23:00</p>
             </div>
           </div>
         </div>
@@ -38,13 +37,10 @@ export default function Home() {
           <h2 className="display">Pochi ingredienti, fatti bene.</h2>
           <div className="prose">
             <p>
-              เราเชื่อว่าอาหารอิตาเลียนที่ดีเริ่มจากวัตถุดิบไม่กี่อย่างที่ดีจริง
-              เส้นพาสต้านวดและตัดใหม่ทุกเช้า ซอสเคี่ยวช้าตามสูตรดั้งเดิม
-              และแป้งพิซซ่าหมักนาน 48 ชั่วโมงก่อนเข้าเตาฟืน
+              We believe that good Italian food starts with a few really good ingredients. Freshly made pasta, slow-cooked sauces, and pizza dough fermented for 48 hours before going into the wood-fired oven.
             </p>
             <p>
-              ห้องอาหารโทนขาวดำเรียบหรู ไฟอบอุ่น เหมาะกับมื้อค่ำสำหรับสองคน
-              ไปจนถึงโต๊ะใหญ่ของครอบครัวและเพื่อนฝูง
+              The restaurant features a sophisticated black and white interior with warm lighting, perfect for a romantic dinner for two or a large table for family and friends.
             </p>
           </div>
         </div>
@@ -53,9 +49,9 @@ export default function Home() {
       <section className="band band--grey">
         <div className="container">
           <div className="section-head">
-            <h2 className="display">จานที่เราภูมิใจ</h2>
+            <h2 className="display">Signature Dishes</h2>
             <Link to="/menu" className="btn btn--dark">
-              ดูเมนูทั้งหมด
+              View All Menu Items
             </Link>
           </div>
           <ul className="signature">
@@ -72,24 +68,24 @@ export default function Home() {
 
       <section className="band band--dark">
         <div className="container">
-          <h2 className="display">มาทานด้วยกันที่ Osteria Nero</h2>
+          <h2 className="display">Come and dine with us at PEN KHON DEE</h2>
           <dl className="info">
             <div>
-              <dt>เวลาเปิดบริการ</dt>
-              <dd>ทุกวัน 17:30 – 23:00</dd>
+              <dt>Operating Hours</dt>
+              <dd>Every day 17:30 – 23:00</dd>
             </div>
             <div>
-              <dt>ที่ตั้ง</dt>
-              <dd>88 ถนนตัวอย่าง แขวงตัวอย่าง กรุงเทพฯ 10110</dd>
+              <dt>Location</dt>
+              <dd>88 Example Road, Example Subdistrict, Bangkok 10110</dd>
             </div>
             <div>
-              <dt>โทรศัพท์</dt>
+              <dt>Phone</dt>
               <dd>02-000-0000</dd>
             </div>
           </dl>
           <div className="cta-row">
             <Link to="/reservation" className="btn btn--light">
-              จองโต๊ะออนไลน์
+              Reserve a Table
             </Link>
           </div>
         </div>

@@ -25,11 +25,11 @@ async function request(path, { method = 'GET', body, token } = {}) {
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองใหม่อีกครั้ง');
+    throw new Error('Can not connect to the server. Please check your internet connection and try again.');
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+    throw new Error(data.message || 'An error occurred. Please try again.');
   }
   return data;
 }
@@ -50,11 +50,11 @@ export async function register({ name, email, phone, password }) {
     const users = read('nero_mock_users', []);
     const key = email.trim().toLowerCase();
     if (users.some((u) => u.email === key)) {
-      throw new Error('อีเมลนี้ถูกใช้สมัครสมาชิกแล้ว');
+      throw new Error('This email is already registered.');
     }
     const user = { id: Date.now(), name, email: key, phone, password };
     write('nero_mock_users', [...users, user]);
-    return { message: 'สมัครสมาชิกเรียบร้อย' };
+    return { message: 'Registration successful.' };
   }
   return request('/auth/register', {
     method: 'POST',
@@ -70,7 +70,7 @@ export async function login({ email, password }) {
     const found = read('nero_mock_users', []).find(
       (u) => u.email === key && u.password === password
     );
-    if (!found) throw new Error('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+    if (!found) throw new Error('Invalid email or password.');
     const { password: _omit, ...user } = found;
     return { token: `mock-${user.id}`, user };
   }

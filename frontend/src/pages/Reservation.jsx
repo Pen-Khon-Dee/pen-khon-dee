@@ -20,13 +20,13 @@ const todayStr = () => {
 
 function validate(v) {
   const e = {};
-  if (!v.name.trim()) e.name = 'กรอกชื่อผู้จอง';
-  if (!/^[0-9+\-\s]{8,15}$/.test(v.phone.trim())) e.phone = 'กรอกเบอร์โทรให้ถูกต้อง เช่น 081-234-5678';
-  if (!/^\S+@\S+\.\S+$/.test(v.email.trim())) e.email = 'กรอกอีเมลให้ถูกต้อง เพื่อรับการยืนยันการจอง';
-  if (!v.date) e.date = 'เลือกวันที่';
-  else if (v.date < todayStr()) e.date = 'เลือกวันที่ตั้งแต่วันนี้เป็นต้นไป';
-  if (!v.time) e.time = 'เลือกเวลา';
-  if (!v.guests) e.guests = 'เลือกจำนวนผู้ทานอาหาร';
+  if (!v.name.trim()) e.name = 'Please enter your name';
+  if (!/^[0-9+\-\s]{8,15}$/.test(v.phone.trim())) e.phone = 'Please enter a valid phone number (8-15 characters)';
+  if (!/^\S+@\S+\.\S+$/.test(v.email.trim())) e.email = 'Please enter a valid email address to receive booking confirmation';
+  if (!v.date) e.date = 'Please select a date';
+  else if (v.date < todayStr()) e.date = 'Please select a date from today onwards';
+  if (!v.time) e.time = 'Please select a time';
+  if (!v.guests) e.guests = 'Please select the number of guests';
   return e;
 }
 
@@ -79,39 +79,39 @@ export default function Reservation() {
         <section className="page-head">
           <div className="container">
             <h1 className="page-head__title">Grazie!</h1>
-            <p className="page-head__lead">เราได้รับการจองของคุณแล้ว</p>
+            <p className="page-head__lead">We have received your booking request</p>
           </div>
         </section>
         <section className="band">
           <div className="container">
             <div className="receipt" role="status">
               <p className="receipt__code">{done.code}</p>
-              <p>รหัสการจอง</p>
+              <p>Booking Code</p>
               <dl className="receipt__list">
                 <div>
-                  <dt>ชื่อผู้จอง</dt>
+                  <dt>Booker's Name</dt>
                   <dd>{done.name}</dd>
                 </div>
                 <div>
-                  <dt>วันและเวลา</dt>
+                  <dt>Date and Time</dt>
                   <dd>
-                    {done.date} เวลา {done.time} น.
+                    {done.date} at {done.time} PM
                   </dd>
                 </div>
                 <div>
-                  <dt>จำนวนผู้ทานอาหาร</dt>
-                  <dd>{done.guests} ท่าน</dd>
+                  <dt>Number of Guests</dt>
+                  <dd>{done.guests} guests</dd>
                 </div>
               </dl>
               <p className="field__hint">
-                เราจะส่งอีเมลยืนยันไปที่ {done.email} โต๊ะจะถูกเก็บไว้ให้ 15 นาทีหลังเวลาที่จอง
+                We will send a confirmation email to {done.email}. The table will be held for 15 minutes after the booked time.
               </p>
               <div className="hero__actions">
                 <Link to="/menu" className="btn btn--dark">
-                  ดูเมนูระหว่างรอ
+                  View Menu While Waiting
                 </Link>
                 <button type="button" className="btn" onClick={() => setDone(null)}>
-                  จองโต๊ะเพิ่ม
+                  Book Another Table
                 </button>
               </div>
             </div>
@@ -127,7 +127,7 @@ export default function Reservation() {
         <div className="container">
           <h1 className="page-head__title">Prenota un tavolo</h1>
           <p className="page-head__lead">
-            เลือกวัน เวลา และจำนวนผู้ทานอาหาร เราจะยืนยันการจองทางอีเมล
+            Choose your preferred date and time, and we will hold the table for you. You will receive a confirmation email with your booking code.
           </p>
         </div>
       </section>
@@ -135,19 +135,20 @@ export default function Reservation() {
       <section className="band">
         <div className="container form-layout">
           <div className="prose">
-            <h2 className="display display--small">ก่อนจอง</h2>
-            <p>รับจองทุกวัน เวลา 17:30 – 22:30 โต๊ะจะถูกเก็บไว้ให้ 15 นาทีหลังเวลาที่จอง</p>
+            <h2 className="display display--small">Before You Book</h2>
             <p>
-              กลุ่มมากกว่า 10 ท่าน กรุณาโทร 02-000-0000
-              เพื่อให้เราจัดโต๊ะและเมนูเฉพาะกลุ่มให้
+              Please note that groups of more than 10 people need to make a reservation by phone at 02-000-0000 to ensure we can accommodate your needs.
+            </p>
+            <p>
+              We will hold your table for 15 minutes after the booked time. If you are running late, please call us at 02-000-0000 to let us know.
             </p>
             {!user && (
               <p>
-                มีบัญชีแล้ว?{' '}
+                Already have an account?{' '}
                 <Link to="/login" state={{ from: { pathname: '/reservation' } }}>
-                  เข้าสู่ระบบ
+                  Log in
                 </Link>{' '}
-                เพื่อกรอกข้อมูลอัตโนมัติ
+                to fill out information automatically
               </p>
             )}
           </div>
@@ -159,45 +160,45 @@ export default function Reservation() {
               </p>
             )}
 
-            <Field label="ชื่อผู้จอง" name="name" value={values.name} onChange={onChange} error={errors.name} autoComplete="name" />
+            <Field label="Name" name="name" value={values.name} onChange={onChange} error={errors.name} autoComplete="name" />
 
             <div className="form__row">
-              <Field label="เบอร์โทร" name="phone" type="tel" value={values.phone} onChange={onChange} error={errors.phone} autoComplete="tel" />
-              <Field label="อีเมล" name="email" type="email" value={values.email} onChange={onChange} error={errors.email} autoComplete="email" />
+              <Field label="Phone" name="phone" type="tel" value={values.phone} onChange={onChange} error={errors.phone} autoComplete="tel" />
+              <Field label="Email" name="email" type="email" value={values.email} onChange={onChange} error={errors.email} autoComplete="email" />
             </div>
 
             <div className="form__row">
-              <Field label="วันที่" name="date" type="date" min={todayStr()} value={values.date} onChange={onChange} error={errors.date} />
-              <Field label="เวลา" name="time" as="select" value={values.time} onChange={onChange} error={errors.time}>
-                <option value="">เลือกเวลา</option>
+              <Field label="Date" name="date" type="date" min={todayStr()} value={values.date} onChange={onChange} error={errors.date} />
+              <Field label="Time" name="time" as="select" value={values.time} onChange={onChange} error={errors.time}>
+                <option value="">Select Time</option>
                 {TIMES.map((t) => (
                   <option key={t} value={t}>
-                    {t} น.
+                    {t} PM
                   </option>
                 ))}
               </Field>
             </div>
 
-            <Field label="จำนวนผู้ทานอาหาร" name="guests" as="select" value={values.guests} onChange={onChange} error={errors.guests}>
+            <Field label="Number of Guests" name="guests" as="select" value={values.guests} onChange={onChange} error={errors.guests}>
               {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
                 <option key={n} value={n}>
-                  {n} ท่าน
+                  {n} Guests
                 </option>
               ))}
             </Field>
 
             <Field
-              label="หมายเหตุ (ถ้ามี)"
+              label="Note (if any)"
               name="note"
               as="textarea"
               rows={3}
               value={values.note}
               onChange={onChange}
-              hint="เช่น วันเกิด ที่นั่งริมหน้าต่าง หรืออาหารที่แพ้"
+              hint="e.g., birthday, window seat, or food allergies"
             />
 
             <button type="submit" className="btn btn--dark btn--block" disabled={loading}>
-              {loading ? 'กำลังจอง…' : 'ยืนยันการจอง'}
+              {loading ? 'Processing...' : 'Confirm Reservation'}
             </button>
           </form>
         </div>

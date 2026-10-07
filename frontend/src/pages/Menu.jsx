@@ -16,7 +16,7 @@ export default function Menu() {
       .catch(() => {
         if (!alive) return;
         setItems(fallbackItems);
-        setNotice('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ จึงแสดงเมนูตัวอย่างแทน');
+        setNotice('Failed to connect to the server. Displaying sample menu instead.');
       });
     return () => {
       alive = false;
@@ -35,8 +35,8 @@ export default function Menu() {
         <div className="container">
           <h1 className="page-head__title">Il Menù</h1>
           <p className="page-head__lead">
-            เมนูอิตาเลียนดั้งเดิม ปรุงสดทุกจาน ราคารวมภาษีมูลค่าเพิ่มแล้ว
-            หากแพ้อาหารหรือทานมังสวิรัติ แจ้งพนักงานได้เลย
+            Traditional Italian menu, prepared fresh for each dish, prices include VAT.
+            If you have any dietary restrictions or are vegetarian, please inform the staff.
           </p>
         </div>
       </section>
@@ -72,11 +72,11 @@ export default function Menu() {
 
           {!items ? (
             <p className="menu-section__note" style={{ marginTop: '2.5rem' }} role="status">
-              กำลังโหลดเมนู…
+              Loading menu…
             </p>
           ) : visible.length === 0 ? (
             <p className="menu-section__note" style={{ marginTop: '2.5rem' }}>
-              ยังไม่มีรายการในหมวดนี้
+              There are no items in this category.
             </p>
           ) : (
             <ul className="dishes">
@@ -88,7 +88,7 @@ export default function Menu() {
                     <span className="price">{baht(dish.price)}</span>
                   </div>
                   <p className="dish__desc">{dish.description}</p>
-                  {dish.vegetarian && <span className="dish__tag">มังสวิรัติ</span>}
+                  {dish.vegetarian && <span className="dish__tag">Vegetarian</span>}
                 </li>
               ))}
             </ul>

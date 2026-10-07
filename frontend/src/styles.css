@@ -35,6 +35,14 @@ html {
 }
 
 body {
+  font-family: "DM Sans", sans-serif;
+}
+
+h1, h2, h3 , .nav{
+  font-family: "Playfair Display", serif;
+}
+
+body {
   margin: 0;
   font-family: var(--sans);
   font-size: 1.0625rem;

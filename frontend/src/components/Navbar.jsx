@@ -50,18 +50,18 @@ export default function Navbar() {
           <div className="nav__auth">
             {user ? (
               <>
-                <span className="nav__user">สวัสดี {user.name}</span>
+                <span className="nav__user">Hello {user.name}</span>
                 <button type="button" className="btn btn--ghost-light btn--small" onClick={logout}>
-                  ออกจากระบบ
+                  Logout
                 </button>
               </>
             ) : (
               <>
                 <Link to="/login" className="nav__link">
-                  เข้าสู่ระบบ
+                  Login
                 </Link>
                 <Link to="/register" className="btn btn--light btn--small">
-                  สมัครสมาชิก
+                  Join Member
                 </Link>
               </>
             )}
