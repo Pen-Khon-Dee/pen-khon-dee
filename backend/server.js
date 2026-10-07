@@ -26,7 +26,7 @@ app.use('/api/categories', require('./routes/categories'));
 app.use('/api/menu', require('./routes/menu'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/order-items', require('./routes/orderItems'));
-app.use('/api/kitchen', require('./routes/kitchen'));
+app.use('/api/kitchen', require('./routes/Kitchen'));
 app.use('/api/reservations', require('./routes/reservations'));
 app.use('/api/customers', require('./routes/customers'));
 app.use('/api/members', require('./routes/members'));
