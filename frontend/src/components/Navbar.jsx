@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const links = [
@@ -11,7 +11,9 @@ const links = [
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setOpen(false);
@@ -20,6 +22,25 @@ export default function Navbar() {
   return (
     <header className="nav">
       <div className="container nav__inner">
+        <form
+          className="nav__search"
+          role="search"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const query = search.trim();
+            navigate(query ? `/menu?q=${encodeURIComponent(query)}` : '/menu');
+          }}
+        >
+          <input
+            type="search"
+            aria-label="ค้นหาเมนูอาหาร"
+            placeholder="ค้นหาเมนู..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          <button type="submit" aria-label="ค้นหา">⌕</button>
+        </form>
+
         <Link to="/" className="brand">
           PEN KHON DEE
         </Link>

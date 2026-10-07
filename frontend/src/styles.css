@@ -1,25 +1,25 @@
 /* ==========================================================
    Osteria Nero — คลาสสิก เรียบหรู ทันสมัย
-   พาเลตต์: ดำ เทา ขาว
+   พาเลตต์: Vanilla Silk, Alpine Oat, Warm Greige, Cherry Velvet, Bordeaux Noir
    ฟอนต์: Bodoni Moda (หัวข้อ, ตระกูลเดียวกับแบบอักษรจากเมืองปาร์ม่า)
           Jost (เนื้อหา), Noto Sans/Serif Thai (ภาษาไทย)
    ========================================================== */
 
 :root {
-  --nero: #000000;
-  --carbone: #1a1a1a;
-  --grafite: #333333;
-  --piombo: #767676;
-  --cenere: #cfcfcf;
-  --marmo: #f3f3f3;
-  --bianco: #ffffff;
-  --muted-on-dark: #b3b3b3;
-  --error: #a61b1b;
+  --nero: #351a20;
+  --carbone: #552326;
+  --grafite: #714447;
+  --piombo: #897970;
+  --cenere: #d0bfb2;
+  --marmo: #e8dccd;
+  --bianco: #f7efe4;
+  --muted-on-dark: #d8c8b9;
+  --error: #923d45;
 
   --serif: 'Bodoni Moda', 'Noto Serif Thai', Didot, 'Times New Roman', serif;
   --sans: 'Jost', 'Noto Sans Thai', system-ui, sans-serif;
 
-  --gutter: clamp(1.25rem, 5vw, 4rem);
+  --gutter: clamp(0.75rem, 3vw, 2rem);
   --max: 1180px;
   --nav-h: 4.5rem;
 }
@@ -34,11 +34,21 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
-body {
+body{
   font-family: "DM Sans", sans-serif;
 }
 
-h1, h2, h3 , .nav{
+h1, h2, h3 ,
+nav,
+.brand,
+.display,
+.plate__title,
+.signature__name,
+.dish__name,
+.page-head__title,
+.menu-section__title,
+.receipt__code,
+.auth-box__title {
   font-family: "Playfair Display", serif;
 }
 
@@ -166,13 +176,49 @@ textarea {
   border-bottom: 1px solid var(--grafite);
 }
 .nav__inner {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: 1.5rem;
   min-height: var(--nav-h);
 }
+.nav__search {
+  grid-column: 1;
+  display: flex;
+  width: min(100%, 14rem);
+  min-width: 0;
+  border: 1px solid var(--piombo);
+}
+.nav__search input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.45rem 0.7rem;
+  color: var(--bianco);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font-size: 0.9rem;
+}
+.nav__search input::placeholder {
+  color: var(--muted-on-dark);
+  opacity: 0.85;
+}
+.nav__search input:focus-visible {
+  outline: 2px solid var(--bianco);
+  outline-offset: -2px;
+}
+.nav__search button {
+  flex: 0 0 2.5rem;
+  color: var(--bianco);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 1.35rem;
+  line-height: 1;
+}
 .brand {
+  grid-column: 2;
+  justify-self: center;
   font-family: var(--serif);
   font-style: italic;
   font-size: 1.625rem;
@@ -180,6 +226,8 @@ textarea {
   text-decoration: none;
 }
 .nav__menu {
+  grid-column: 3;
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: 2.5rem;
@@ -223,10 +271,29 @@ textarea {
 }
 
 @media (max-width: 860px) {
+  .nav__inner {
+    grid-template-rows: auto auto;
+    gap: 0.65rem 1rem;
+    padding-block: 0.75rem;
+  }
+  .nav__search {
+    grid-column: 1 / 4;
+    grid-row: 2;
+    width: min(100%, 22rem);
+  }
+  .brand {
+    grid-column: 2;
+    grid-row: 1;
+    white-space: nowrap;
+  }
   .nav__toggle {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
     display: inline-flex;
   }
   .nav__menu {
+    grid-column: auto;
     display: none;
     position: absolute;
     top: 100%;
@@ -276,7 +343,7 @@ textarea {
 }
 .prose {
   max-width: 34rem;
-  color: #2b2b2b;
+  color: #493b37;
 }
 .prose p + p {
   margin-top: 1.25rem;
@@ -284,16 +351,19 @@ textarea {
 
 /* ---------- Hero ---------- */
 .hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: clamp(40rem, 82vh, 58rem);
   background: var(--nero);
   color: var(--bianco);
-  padding-block: clamp(3rem, 7vw, 6rem) clamp(4rem, 9vw, 8rem);
+  padding-block: clamp(5rem, 10vw, 8rem);
   overflow: hidden;
 }
 .hero__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  gap: clamp(2.5rem, 6vw, 5rem);
-  align-items: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
 }
 .hero__title {
   font-family: var(--serif);
@@ -316,6 +386,72 @@ textarea {
   margin-top: 2.25rem;
 }
 
+.hero__visual {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(145deg, #b7a69b, #552326 72%, #351a20);
+}
+.hero__slide {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 900ms ease, transform 5.5s ease;
+}
+.hero__slide.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+.hero__visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(31, 15, 18, 0.78), rgba(31, 15, 18, 0.38) 58%, rgba(31, 15, 18, 0.12)), linear-gradient(0deg, rgba(31, 15, 18, 0.35), transparent 45%);
+}
+.hero__slide-controls {
+  position: absolute;
+  z-index: 2;
+  right: var(--gutter);
+  bottom: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.hero__arrow,
+.hero__dot {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--bianco);
+  background: rgba(53, 26, 32, 0.58);
+  border: 1px solid rgba(247, 239, 228, 0.65);
+  cursor: pointer;
+}
+.hero__arrow {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.hero__dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+}
+.hero__dot.is-active {
+  background: var(--bianco);
+}
+.hero__arrow:hover,
+.hero__dot:hover {
+  background: var(--carbone);
+}
+
 /* จานอาหาร: จุดเด่นของหน้าแรก */
 .plate {
   position: relative;
@@ -323,8 +459,8 @@ textarea {
   aspect-ratio: 1;
   margin-inline: auto;
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 28%, #ffffff 0%, #e4e4e4 55%, #bdbdbd 100%);
-  box-shadow: 0 0 0 1px #4a4a4a, 0 40px 80px -30px rgba(255, 255, 255, 0.18);
+  background: radial-gradient(circle at 34% 28%, #fff9f0 0%, #e8dccd 55%, #b7a69b 100%);
+  box-shadow: 0 0 0 1px #897970, 0 40px 80px -30px rgba(247, 239, 228, 0.18);
   display: grid;
   place-items: center;
   text-align: center;
@@ -335,7 +471,7 @@ textarea {
   content: '';
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(53, 26, 32, 0.18);
 }
 .plate::before {
   inset: 8%;
@@ -358,7 +494,7 @@ textarea {
 .plate__sub {
   margin-top: 0.5rem;
   font-size: 0.95rem;
-  color: #4a4a4a;
+  color: #65524c;
 }
 
 @keyframes settle {
@@ -407,7 +543,7 @@ textarea {
   line-height: 1.2;
 }
 .signature__desc {
-  color: #4d4d4d;
+  color: #65524c;
 }
 .price {
   font-family: var(--serif);
@@ -523,14 +659,14 @@ textarea {
   margin-top: 0.35rem;
   font-size: 0.98rem;
   line-height: 1.65;
-  color: #4d4d4d;
+  color: #65524c;
 }
 .dish__tag {
   display: inline-block;
   margin-top: 0.5rem;
   padding: 0 0.6rem;
   font-size: 0.8rem;
-  color: #4d4d4d;
+  color: var(--carbone);
   border: 1px solid var(--piombo);
 }
 
@@ -563,7 +699,7 @@ textarea {
   min-height: 3rem;
   padding: 0.8rem 1rem;
   background: var(--bianco);
-  border: 1px solid #8a8a8a;
+  border: 1px solid var(--piombo);
   border-radius: 0;
 }
 textarea.field__control {
@@ -591,8 +727,8 @@ textarea.field__control {
   border: 1px solid;
 }
 .alert--error {
-  color: #7a1212;
-  background: #fdf3f3;
+  color: #6d2027;
+  background: #f8e9e5;
   border-color: var(--error);
 }
 .alert--ok {
@@ -674,7 +810,7 @@ textarea.field__control {
 }
 .auth-box__switch {
   font-size: 0.95rem;
-  color: #4d4d4d;
+  color: #65524c;
 }
 
 /* ---------- Footer ---------- */
@@ -715,7 +851,6 @@ textarea.field__control {
 
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
-  .hero__grid,
   .story,
   .form-layout,
   .info,

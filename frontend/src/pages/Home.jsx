@@ -1,12 +1,63 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { menuItems, signatureIds } from '../data/menu';
 
 const signature = signatureIds.map((id) => menuItems.find((m) => m.id === id)).filter(Boolean);
+const heroImages = [
+  { src: '/images/hero-1.jpg', alt: 'บรรยากาศร้าน PEN KHON DEE' },
+  { src: '/images/hero-2.jpg', alt: 'อาหารจานพิเศษของร้าน' },
+  { src: '/images/hero-3.jpg', alt: 'มื้ออาหารสไตล์อิตาเลียน' },
+];
+
+function HeroSlideshow() {
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % heroImages.length);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const showSlide = (index) => {
+    setActiveSlide((index + heroImages.length) % heroImages.length);
+  };
+
+  return (
+    <div className="hero__visual" aria-label="ภาพบรรยากาศร้านอาหาร">
+      {heroImages.map((image, index) => (
+        <div
+          key={image.src}
+          className={`hero__slide${index === activeSlide ? ' is-active' : ''}`}
+          role="img"
+          aria-label={image.alt}
+          style={{ backgroundImage: `url("${image.src}")` }}
+          aria-hidden={index !== activeSlide}
+        />
+      ))}
+      <div className="hero__slide-controls" aria-label="เลือกภาพสไลด์">
+        <button className="hero__arrow" type="button" onClick={() => showSlide(activeSlide - 1)} aria-label="ภาพก่อนหน้า">‹</button>
+        {heroImages.map((image, index) => (
+          <button
+            key={image.src}
+            className={`hero__dot${index === activeSlide ? ' is-active' : ''}`}
+            type="button"
+            onClick={() => showSlide(index)}
+            aria-label={`ไปภาพที่ ${index + 1}`}
+            aria-current={index === activeSlide ? 'true' : undefined}
+          />
+        ))}
+        <button className="hero__arrow" type="button" onClick={() => showSlide(activeSlide + 1)} aria-label="ภาพถัดไป">›</button>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
     <>
       <section className="hero">
+        <HeroSlideshow />
         <div className="container hero__grid">
           <div>
             <h1 className="hero__title">A tavola, senza fretta.</h1>
@@ -23,12 +74,6 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="plate">
-            <div className="plate__body">
-              <p className="plate__title">Aperto ogni sera</p>
-              <p className="plate__sub">Open every evening 17:30 – 23:00</p>
-            </div>
-          </div>
         </div>
       </section>
 

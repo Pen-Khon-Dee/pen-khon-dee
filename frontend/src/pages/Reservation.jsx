@@ -6,7 +6,8 @@ import { useAuth } from '../context/AuthContext';
 
 const TIMES = (() => {
   const out = [];
-  for (let m = 17 * 60 + 30; m <= 22 * 60 + 30; m += 30) {
+  for (let 
+    m = 17 * 60 + 30; m <= 22 * 60 + 30; m += 30) {
     out.push(`${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`);
   }
   return out;

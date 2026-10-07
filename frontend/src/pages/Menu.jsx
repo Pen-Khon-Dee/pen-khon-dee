@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { categories, menuItems as fallbackItems } from '../data/menu';
 import { getMenu } from '../api';
 
 const baht = (n) => `฿${Number(n).toLocaleString('th-TH')}`;
 
 export default function Menu() {
+  const [searchParams] = useSearchParams();
+  const query = (searchParams.get('q') || '').trim().toLocaleLowerCase();
   const [items, setItems] = useState(null);
   const [notice, setNotice] = useState('');
   const [active, setActive] = useState(categories[0].id);
@@ -25,8 +28,12 @@ export default function Menu() {
 
   const category = categories.find((c) => c.id === active);
   const visible = useMemo(
-    () => (items ? items.filter((i) => i.category === active) : []),
-    [items, active]
+    () => (items ? items.filter((i) => {
+      const matchesCategory = query ? true : i.category === active;
+      const searchableText = `${i.name} ${i.description}`.toLocaleLowerCase();
+      return matchesCategory && (!query || searchableText.includes(query));
+    }) : []),
+    [items, active, query]
   );
 
   return (
@@ -67,8 +74,8 @@ export default function Menu() {
             </p>
           )}
 
-          <h2 className="menu-section__title">{category.label}</h2>
-          <p className="menu-section__note">{category.note}</p>
+          <h2 className="menu-section__title">{query ? `Search results for “${searchParams.get('q')}”` : category.label}</h2>
+          <p className="menu-section__note">{query ? 'Matching dishes from our menu.' : category.note}</p>
 
           {!items ? (
             <p className="menu-section__note" style={{ marginTop: '2.5rem' }} role="status">
@@ -76,7 +83,7 @@ export default function Menu() {
             </p>
           ) : visible.length === 0 ? (
             <p className="menu-section__note" style={{ marginTop: '2.5rem' }}>
-              There are no items in this category.
+              {query ? 'No dishes matched your search.' : 'There are no items in this category.'}
             </p>
           ) : (
             <ul className="dishes">
