@@ -28,6 +28,8 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/order-items', require('./routes/orderItems'));
 app.use('/api/kitchen', require('./routes/kitchen'));
 app.use('/api/reservations', require('./routes/reservations'));
+app.use('/api/customers', require('./routes/customers'));
+app.use('/api/members', require('./routes/members'));
 
 // Unknown path
 app.use((req, res) => {
