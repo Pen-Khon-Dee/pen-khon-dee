@@ -354,7 +354,7 @@ textarea {
   background: var(--marmo);
 }
 .band--dark {
-  background: var(--nero);
+  background: var(--carbone);
   color: var(--bianco);
 }
 
@@ -383,7 +383,7 @@ textarea {
   display: flex;
   align-items: center;
   min-height: clamp(40rem, 82vh, 58rem);
-  background: var(--nero);
+  background: var(--carbone);
   color: var(--bianco);
   padding-block: clamp(5rem, 10vw, 8rem);
   overflow: hidden;
@@ -419,7 +419,7 @@ textarea {
   z-index: 0;
   inset: 0;
   overflow: hidden;
-  background: linear-gradient(145deg, var(--piombo), var(--carbone) 72%, var(--nero));
+  background: linear-gradient(145deg, var(--piombo), var(--carbone) 72%, var(--carbone));
 }
 .hero__slide {
   position: absolute;
@@ -439,7 +439,7 @@ textarea {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(31, 15, 18, 0.78), rgba(31, 15, 18, 0.38) 58%, rgba(31, 15, 18, 0.12)), linear-gradient(0deg, rgba(31, 15, 18, 0.35), transparent 45%);
+  background: linear-gradient(90deg, rgba(67, 24, 37, 0.78), rgba(67, 24, 37, 0.38) 58%, rgba(67, 24, 37, 0.12)), linear-gradient(0deg, rgba(67, 24, 37, 0.35), transparent 45%);
 }
 .hero__slide-controls {
   position: absolute;
@@ -817,7 +817,7 @@ textarea.field__control {
   justify-content: flex-end;
   gap: 1.25rem;
   padding: clamp(2rem, 6vw, 5rem);
-  background: var(--nero);
+  background: var(--carbone);
   color: var(--bianco);
 }
 .auth-split__quote {
@@ -858,7 +858,7 @@ textarea.field__control {
 /* ---------- Footer ---------- */
 .footer {
   padding-block: 3.5rem 2rem;
-  background: var(--nero);
+  background: var(--carbone);
   color: var(--muted-on-dark);
   font-size: 0.95rem;
   border-top: 1px solid var(--grafite);
@@ -892,6 +892,216 @@ textarea.field__control {
   text-align: center;
 }
 
+/* ---------- Staff admin ---------- */
+.admin-page {
+  min-height: 70vh;
+  padding-block: clamp(2.5rem, 6vw, 5rem);
+  background: var(--bianco);
+}
+.admin-login {
+  display: grid;
+  min-height: 70vh;
+  place-items: center;
+  padding: 3rem var(--gutter);
+  background: var(--bianco);
+}
+.admin-login__card {
+  width: min(100%, 30rem);
+  padding: clamp(1.5rem, 5vw, 3rem);
+  background: var(--marmo);
+}
+.admin-eyebrow {
+  color: var(--piombo);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.admin-title {
+  margin-top: 0.5rem;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 500;
+  line-height: 1.1;
+}
+.admin-subtitle {
+  margin-top: 0.75rem;
+  color: var(--piombo);
+}
+.admin-login .form {
+  margin-top: 1.75rem;
+}
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--cenere);
+}
+.admin-logout {
+  color: var(--carbone);
+  border-color: var(--carbone);
+}
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-block: 1.5rem;
+  border-bottom: 1px solid var(--cenere);
+}
+.admin-tabs button {
+  padding: 0.75rem 1rem;
+  color: var(--piombo);
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.admin-tabs button.is-active {
+  color: var(--carbone);
+  border-bottom-color: var(--carbone);
+}
+.admin-message {
+  margin-block: 1rem;
+}
+.admin-loading,
+.admin-empty,
+.admin-footnote {
+  padding-block: 1rem;
+  color: var(--piombo);
+}
+.admin-section {
+  padding-top: 1.25rem;
+}
+.admin-section__title {
+  margin-bottom: 1rem;
+  font-family: var(--serif);
+  font-size: 1.65rem;
+  font-weight: 500;
+}
+.admin-section__title--list {
+  margin-top: 3rem;
+}
+.admin-menu-form {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1.4fr) minmax(10rem, 1fr) minmax(8rem, 0.7fr) auto;
+  align-items: end;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--marmo);
+}
+.admin-table-wrap {
+  overflow-x: auto;
+  border-top: 1px solid var(--cenere);
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.admin-table th,
+.admin-table td {
+  padding: 0.9rem 0.75rem;
+  border-bottom: 1px solid var(--cenere);
+}
+.admin-table th {
+  color: var(--piombo);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.admin-status {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  background: var(--marmo);
+  color: var(--piombo);
+  font-size: 0.8rem;
+}
+.admin-status.is-available {
+  background: rgba(107, 112, 92, 0.14);
+  color: var(--piombo);
+}
+.admin-status.is-muted {
+  background: rgba(122, 38, 58, 0.1);
+  color: var(--carbone);
+}
+.admin-text-button {
+  padding: 0.3rem 0;
+  color: var(--carbone);
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+.admin-text-button:disabled,
+.admin-reservation__actions button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.admin-reservation-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+.admin-date {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--piombo);
+  font-size: 0.9rem;
+}
+.admin-date input {
+  min-height: 2.75rem;
+  padding: 0.4rem 0.65rem;
+  color: var(--nero);
+  background: var(--bianco);
+  border: 1px solid var(--cenere);
+  font: inherit;
+}
+.admin-reservation-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+.admin-reservation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  background: var(--marmo);
+}
+.admin-reservation__main > p {
+  margin-top: 0.25rem;
+  color: var(--piombo);
+  font-size: 0.92rem;
+}
+.admin-reservation__topline {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.admin-reservation__topline h3 {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+.admin-reservation__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.admin-reservation__actions button {
+  padding: 0.5rem 0.7rem;
+  color: var(--carbone);
+  background: transparent;
+  border: 1px solid var(--cenere);
+  cursor: pointer;
+}
+.admin-reservation__actions button:hover {
+  border-color: var(--carbone);
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
   .story,
@@ -899,6 +1109,9 @@ textarea.field__control {
   .info,
   .footer__grid {
     grid-template-columns: 1fr;
+  }
+  .admin-menu-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .plate {
     width: min(100%, 340px);
@@ -924,6 +1137,46 @@ textarea.field__control {
   }
   .form__row {
     grid-template-columns: 1fr;
+  }
+  .admin-header,
+  .admin-reservation-heading,
+  .admin-reservation {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .admin-menu-form {
+    grid-template-columns: 1fr;
+  }
+  .admin-table thead {
+    display: none;
+  }
+  .admin-table,
+  .admin-table tbody,
+  .admin-table tr,
+  .admin-table td {
+    display: block;
+    width: 100%;
+  }
+  .admin-table tr {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--cenere);
+  }
+  .admin-table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0.25rem;
+    border: 0;
+  }
+  .admin-table td::before {
+    content: attr(data-label);
+    color: var(--piombo);
+  }
+  .admin-table td.admin-empty {
+    display: block;
+  }
+  .admin-reservation__actions {
+    justify-content: flex-start;
   }
 }
 

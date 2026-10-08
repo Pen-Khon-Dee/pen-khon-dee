@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Field from '../components/Field';
 import { useAuth } from '../context/AuthContext';
+import { adminLogin } from '../api';
+
+const ADMIN_SESSION_KEY = 'pen_khon_dee_cashier';
+const MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
 export default function Login() {
   const { login } = useAuth();
@@ -30,11 +34,40 @@ export default function Login() {
     if (Object.keys(found).length) return;
 
     setLoading(true);
-    try {
-      await login(values.email.trim(), values.password);
-      navigate(redirectTo, { replace: true });
-    } catch (err) {
-      setSubmitError(err.message);
+    const email = values.email.trim().toLowerCase();
+    if (MOCK) {
+      try {
+        await login(email, values.password);
+        navigate(redirectTo, { replace: true });
+      } catch (customerError) {
+        try {
+          const data = await adminLogin({ email, password: values.password });
+          if (data.employee?.role !== 'Cashier') {
+            throw new Error('บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานหน้าแอดมิน');
+          }
+          sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({
+            token: data.token,
+            employee: data.employee,
+          }));
+          navigate('/admin', { replace: true });
+        } catch {
+          setSubmitError(customerError.message);
+        }
+      }
+    } else {
+      try {
+        const data = await adminLogin({ email, password: values.password });
+        if (data.employee?.role !== 'Cashier') {
+          throw new Error('บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานหน้าแอดมิน');
+        }
+        sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({
+          token: data.token,
+          employee: data.employee,
+        }));
+        navigate('/admin', { replace: true });
+      } catch (err) {
+        setSubmitError(err.message);
+      }
     } finally {
       setLoading(false);
     }

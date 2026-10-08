@@ -29,7 +29,7 @@ async function request(path, { method = 'GET', body, token } = {}) {
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || 'An error occurred. Please try again.');
+    throw new Error(data.message || data.error || 'An error occurred. Please try again.');
   }
   return data;
 }
@@ -87,4 +87,41 @@ export async function createReservation(payload, token) {
     return booking;
   }
   return request('/reservations', { method: 'POST', body: payload, token });
+}
+
+/* ---------- Cashier admin ---------- */
+export function adminLogin({ email, password }) {
+  return request('/auth/login', { method: 'POST', body: { email, password } });
+}
+
+export function getAdminSession(token) {
+  return request('/auth/me', { token });
+}
+
+export function getAdminCategories(token) {
+  return request('/categories', { token });
+}
+
+export function getAdminMenu(token) {
+  return request('/menu?include_discontinued=true', { token });
+}
+
+export function addAdminMenuItem(payload, token) {
+  return request('/menu', { method: 'POST', body: payload, token });
+}
+
+export function setAdminMenuAvailability(id, availability_status, token) {
+  return request(`/menu/${id}/availability`, {
+    method: 'PATCH', body: { availability_status }, token,
+  });
+}
+
+export function getAdminReservations(date, token) {
+  return request(`/reservations?date=${encodeURIComponent(date)}`, { token });
+}
+
+export function setAdminReservationStatus(id, reservation_status, token) {
+  return request(`/reservations/${id}`, {
+    method: 'PATCH', body: { reservation_status }, token,
+  });
 }

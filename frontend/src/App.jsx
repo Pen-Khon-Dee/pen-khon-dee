@@ -7,6 +7,7 @@ import Menu from './pages/Menu';
 import Reservation from './pages/Reservation';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import Admin from './pages/Admin';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -49,6 +50,7 @@ export default function App() {
           <Route path="/reservation" element={<Reservation />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
