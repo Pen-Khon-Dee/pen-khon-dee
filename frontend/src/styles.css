@@ -5,15 +5,15 @@
    ========================================================== */
 
 :root {
-  --nero: #211f1d;
-  --carbone: #393633;
-  --grafite: #d8d3cc;
-  --piombo: #7b7771;
-  --cenere: #ded9d2;
-  --marmo: #f0ede8;
-  --bianco: #fbfaf7;
-  --muted-on-dark: #e6ded4;
-  --error: #923d45;
+  --nero: #3e3028;
+  --carbone: #7a263a;
+  --grafite: #d8c3a5;
+  --piombo: #6b705c;
+  --cenere: #d8c3a5;
+  --marmo: #f7f2e8;
+  --bianco: #f7f2e8;
+  --muted-on-dark: #e9ddc9;
+  --error: #7a263a;
 
   --serif: 'Playfair Display', serif;
   --sans: 'DM Sans', sans-serif;
@@ -138,13 +138,13 @@ textarea {
   color: var(--bianco);
 }
 .btn--dark {
-  background: var(--nero);
+  background: var(--carbone);
   color: var(--bianco);
-  border-color: var(--nero);
+  border-color: var(--carbone);
 }
 .btn--dark:hover {
   background: transparent;
-  color: var(--nero);
+  color: var(--carbone);
 }
 .btn--ghost-light {
   color: var(--bianco);
@@ -231,10 +231,15 @@ textarea {
   text-decoration: none;
 }
 .nav .brand {
-  font-family: var(--sans);
-  font-style: normal;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  display: flex;
+  align-items: center;
+}
+.brand__logo {
+  display: block;
+  width: clamp(11rem, 15vw, 14rem);
+  height: 2.75rem;
+  object-fit: cover;
+  object-position: center;
 }
 .nav__menu {
   grid-column: 3;
@@ -259,8 +264,8 @@ textarea {
   color: var(--nero);
 }
 .nav__link.active {
-  color: var(--nero);
-  border-bottom-color: var(--nero);
+  color: var(--carbone);
+  border-bottom-color: var(--carbone);
 }
 .nav__auth {
   display: flex;
@@ -273,11 +278,11 @@ textarea {
 }
 .nav .btn--light {
   color: var(--bianco);
-  background: var(--nero);
-  border-color: var(--nero);
+  background: var(--carbone);
+  border-color: var(--carbone);
 }
 .nav .btn--light:hover {
-  color: var(--nero);
+  color: var(--carbone);
   background: transparent;
 }
 .nav__toggle {
@@ -366,7 +371,7 @@ textarea {
 }
 .prose {
   max-width: 34rem;
-  color: #493b37;
+  color: var(--nero);
 }
 .prose p + p {
   margin-top: 1.25rem;
@@ -414,7 +419,7 @@ textarea {
   z-index: 0;
   inset: 0;
   overflow: hidden;
-  background: linear-gradient(145deg, #b7a69b, #552326 72%, #351a20);
+  background: linear-gradient(145deg, var(--piombo), var(--carbone) 72%, var(--nero));
 }
 .hero__slide {
   position: absolute;
@@ -482,8 +487,8 @@ textarea {
   aspect-ratio: 1;
   margin-inline: auto;
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 28%, #fff9f0 0%, #e8dccd 55%, #b7a69b 100%);
-  box-shadow: 0 0 0 1px #897970, 0 40px 80px -30px rgba(247, 239, 228, 0.18);
+  background: radial-gradient(circle at 34% 28%, var(--bianco) 0%, var(--marmo) 55%, var(--cenere) 100%);
+  box-shadow: 0 0 0 1px var(--piombo), 0 40px 80px -30px rgba(247, 242, 232, 0.18);
   display: grid;
   place-items: center;
   text-align: center;
@@ -517,7 +522,7 @@ textarea {
 .plate__sub {
   margin-top: 0.5rem;
   font-size: 0.95rem;
-  color: #65524c;
+  color: var(--nero);
 }
 
 @keyframes settle {
@@ -566,11 +571,14 @@ textarea {
   line-height: 1.2;
 }
 .signature__desc {
-  color: #65524c;
+  color: var(--piombo);
 }
 .price {
-  font-family: var(--serif);
-  font-size: 1.375rem;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.125rem;
+  color: var(--carbone);
   white-space: nowrap;
 }
 
@@ -645,9 +653,9 @@ textarea {
 .menu-tab[aria-pressed='true'] {
   padding-inline: 1rem;
   color: var(--bianco);
-  background: var(--nero);
+  background: var(--carbone);
   font-weight: 500;
-  border-bottom-color: var(--nero);
+  border-bottom-color: var(--carbone);
 }
 .menu-section__title {
   font-family: var(--serif);
@@ -670,7 +678,7 @@ textarea {
 .dish {
   min-width: 0;
   padding: clamp(1.25rem, 2.5vw, 2rem);
-  background: #eeebe6;
+  background: var(--marmo);
 }
 .dish__row {
   display: flex;
@@ -693,7 +701,7 @@ textarea {
   margin-top: 0.35rem;
   font-size: 0.98rem;
   line-height: 1.65;
-  color: #67635e;
+  color: var(--piombo);
 }
 .dish__tag {
   display: inline-block;
@@ -761,8 +769,8 @@ textarea.field__control {
   border: 1px solid;
 }
 .alert--error {
-  color: #6d2027;
-  background: #f8e9e5;
+  color: var(--carbone);
+  background: var(--marmo);
   border-color: var(--error);
 }
 .alert--ok {
@@ -844,7 +852,7 @@ textarea.field__control {
 }
 .auth-box__switch {
   font-size: 0.95rem;
-  color: #65524c;
+  color: var(--nero);
 }
 
 /* ---------- Footer ---------- */
@@ -881,6 +889,7 @@ textarea.field__control {
   padding-top: 1.25rem;
   font-size: 0.85rem;
   border-top: 1px solid var(--grafite);
+  text-align: center;
 }
 
 /* ---------- Responsive ---------- */

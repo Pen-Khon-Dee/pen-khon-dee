@@ -50,7 +50,7 @@ export default function Menu() {
 
       <div className="menu-tabs">
         <div className="container">
-          <div className="menu-tabs__list" role="group" aria-label="หมวดเมนู">
+          <div className="menu-tabs__list" role="group" aria-label="Menu Categories">
             {categories.map((c) => (
               <button
                 key={c.id}

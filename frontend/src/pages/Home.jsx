@@ -35,7 +35,7 @@ function HeroSlideshow() {
           aria-hidden={index !== activeSlide}
         />
       ))}
-      <div className="hero__slide-controls" aria-label="เลือกภาพสไลด์">
+      <div className="hero__slide-controls" aria-label="slideshow controls">
         <button className="hero__arrow" type="button" onClick={() => showSlide(activeSlide - 1)} aria-label="ภาพก่อนหน้า">‹</button>
         {heroImages.map((image, index) => (
           <button

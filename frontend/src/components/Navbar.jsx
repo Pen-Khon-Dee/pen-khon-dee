@@ -42,7 +42,7 @@ export default function Navbar() {
         </form>
 
         <Link to="/" className="brand">
-          PEN KHON DEE
+          <img className="brand__logo" src="/images/pen-khon-dee-logo.jpg" alt="PEN KHON DEE" />
         </Link>
 
         <button
