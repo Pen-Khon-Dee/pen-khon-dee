@@ -30,12 +30,12 @@ INSERT INTO member (member_id, customer_id, level_id, current_points, join_date)
 (4, 4, 1,   0, CURDATE());
 
 -- password_hash is a placeholder; run `npm run set-passwords` to set real bcrypt hashes
-INSERT INTO employee (employee_id, name, phone, username, password_hash, role, status) VALUES
-(1, 'Somsak Thongchai', '0891111001', 'cashier1', 'SET_IN_STEP_3', 'Cashier', 'Active'),
-(2, 'Napa Wongsawat', '0891111002', 'cashier2', 'SET_IN_STEP_3', 'Cashier', 'Active'),
-(3, 'Phum Rattanakul', '0891111003', 'server1',  'SET_IN_STEP_3', 'Server',  'Active'),
-(4, 'Praew Siriwan', '0891111004', 'server2',  'SET_IN_STEP_3', 'Server',  'Active'),
-(5, 'Ton Kaewmanee', '0891111005', 'server3',  'SET_IN_STEP_3', 'Server',  'Inactive');  -- has resigned
+INSERT INTO employee (employee_id, name, phone, username, email, password_hash, role, status) VALUES
+(1, 'Somsak Thongchai', '0891111001', 'cashier1', 'cashier1@penkhondee.com', 'SET_IN_STEP_3', 'Cashier', 'Active'),
+(2, 'Napa Wongsawat', '0891111002', 'cashier2', 'cashier2@penkhondee.com', 'SET_IN_STEP_3', 'Cashier', 'Active'),
+(3, 'Phum Rattanakul', '0891111003', 'server1',  'server1@penkhondee.com',  'SET_IN_STEP_3', 'Server',  'Active'),
+(4, 'Praew Siriwan', '0891111004', 'server2',  'server2@penkhondee.com',  'SET_IN_STEP_3', 'Server',  'Active'),
+(5, 'Ton Kaewmanee', '0891111005', 'server3',  'server3@penkhondee.com',  'SET_IN_STEP_3', 'Server',  'Inactive');  -- has resigned
 
 -- 10 tables: 2, 4, 7, 8 are occupied (matching the Open orders below)
 INSERT INTO dining_table (table_id, table_number, capacity, table_status) VALUES

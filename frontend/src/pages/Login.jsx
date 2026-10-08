@@ -34,12 +34,28 @@ export default function Login() {
     if (Object.keys(found).length) return;
 
     setLoading(true);
-    const email = values.email.trim().toLowerCase();
-    if (MOCK) {
-      try {
-        await login(email, values.password);
-        navigate(redirectTo, { replace: true });
-      } catch (customerError) {
+    try {
+      const email = values.email.trim().toLowerCase();
+      if (MOCK) {
+        try {
+          await login(email, values.password);
+          navigate(redirectTo, { replace: true });
+        } catch (customerError) {
+          try {
+            const data = await adminLogin({ email, password: values.password });
+            if (data.employee?.role !== 'Cashier') {
+              throw new Error('บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานหน้าแอดมิน');
+            }
+            sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({
+              token: data.token,
+              employee: data.employee,
+            }));
+            navigate('/admin', { replace: true });
+          } catch {
+            setSubmitError(customerError.message);
+          }
+        }
+      } else {
         try {
           const data = await adminLogin({ email, password: values.password });
           if (data.employee?.role !== 'Cashier') {
@@ -50,23 +66,9 @@ export default function Login() {
             employee: data.employee,
           }));
           navigate('/admin', { replace: true });
-        } catch {
-          setSubmitError(customerError.message);
+        } catch (err) {
+          setSubmitError(err.message);
         }
-      }
-    } else {
-      try {
-        const data = await adminLogin({ email, password: values.password });
-        if (data.employee?.role !== 'Cashier') {
-          throw new Error('บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานหน้าแอดมิน');
-        }
-        sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({
-          token: data.token,
-          employee: data.employee,
-        }));
-        navigate('/admin', { replace: true });
-      } catch (err) {
-        setSubmitError(err.message);
       }
     } finally {
       setLoading(false);

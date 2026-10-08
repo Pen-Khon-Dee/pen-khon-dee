@@ -9,14 +9,15 @@ const router = express.Router();
 // POST /api/auth/login
 router.post('/login', async (req, res, next) => {
   try {
-    const { username, password } = req.body || {};
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
+    const { email, username, password } = req.body || {};
+    const identifier = String(email || username || '').trim().toLowerCase();
+    if (!identifier || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
     }
 
     const [rows] = await pool.query(
-      'SELECT employee_id, name, role, status, password_hash FROM employee WHERE username = ?',
-      [username]
+      'SELECT employee_id, name, role, status, password_hash FROM employee WHERE email = ? OR username = ?',
+      [identifier, identifier]
     );
     const employee = rows[0];
 

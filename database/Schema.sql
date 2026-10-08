@@ -51,6 +51,7 @@ CREATE TABLE employee (
   name           VARCHAR(100)  NOT NULL,
   phone          VARCHAR(20)   NULL,
   username       VARCHAR(50)   NOT NULL UNIQUE,
+  email          VARCHAR(160)  NULL UNIQUE,
   password_hash  VARCHAR(255)  NOT NULL,           -- bcrypt hash, never the plain password
   role           ENUM('Server','Cashier')   NOT NULL,
   status         ENUM('Active','Inactive')  NOT NULL DEFAULT 'Active'
