@@ -121,7 +121,8 @@ CREATE TABLE menu (
 CREATE TABLE orders (
   order_id         INT UNSIGNED   AUTO_INCREMENT PRIMARY KEY,
   customer_id      INT UNSIGNED   NULL,              -- NULL = anonymous walk-in
-  employee_id      INT UNSIGNED   NOT NULL,          -- Cashier who opened the order
+  employee_id      INT UNSIGNED   NULL,              -- NULL for orders opened by customers
+  customer_order_token_hash CHAR(64) NULL UNIQUE,    -- grants a customer access to add items to their order
   order_datetime   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- time the guests were seated
   order_status     ENUM('Open','Closed','Cancelled') NOT NULL DEFAULT 'Open',
   payment_status   ENUM('Unpaid','Paid')             NOT NULL DEFAULT 'Unpaid',

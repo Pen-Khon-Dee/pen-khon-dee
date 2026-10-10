@@ -1,20 +1,16 @@
 {
-  "name": "osteria-nero-frontend",
+  "name": "pen-khon-dee-frontends",
   "private": true,
-  "version": "1.0.0",
-  "type": "module",
+  "workspaces": [
+    "staff-web",
+    "customer-web"
+  ],
   "scripts": {
-    "dev": "vite --open",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^5.4.11"
+    "dev": "npm run dev:staff",
+    "dev:staff": "npm run dev --workspace osteria-nero-frontend",
+    "dev:customer": "npm run dev --workspace pen-khon-dee-customer-web",
+    "build": "npm run build:staff && npm run build:customer",
+    "build:staff": "npm run build --workspace osteria-nero-frontend",
+    "build:customer": "npm run build --workspace pen-khon-dee-customer-web"
   }
 }

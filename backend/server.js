@@ -24,6 +24,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tables', require('./routes/tables'));
 app.use('/api/categories', require('./routes/categories'));
 app.use('/api/menu', require('./routes/menu'));
+app.use('/api/customer', require('./routes/customerOrders'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/order-items', require('./routes/orderItems'));
 app.use('/api/kitchen', require('./routes/Kitchen'));

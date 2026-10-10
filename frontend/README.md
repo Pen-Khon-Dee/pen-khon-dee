@@ -1,31 +1,38 @@
-# Pen Khon Dee Admin
+# Pen Khon Dee Frontends
 
-Internal restaurant management dashboard built with React, Vite, and React Router. Customers do not use this application.
-
-## Pages
-
-| Page | Route | File |
-| --- | --- | --- |
-| Staff sign-in | `/login` | `src/pages/Login.jsx` |
-| Admin dashboard | `/admin` | `src/pages/Admin.jsx` |
-
-The root route redirects to `/admin`. Unrecognized routes show an admin-focused 404 page.
+This folder contains two separate web apps. The internal staff dashboard remains in `staff-web`; the public table-ordering website is in `customer-web`.
 
 ## Run locally
 
+Start the backend from the repository root:
+
 ```bash
-npm install
-npm run dev
-npm run build
+npm --prefix backend run dev
 ```
 
-The Vite development server runs at `http://localhost:5173` and proxies `/api` requests to the backend at `http://localhost:3000`.
+Install dependencies for both apps once from the frontend workspace root:
 
-Set `VITE_API_URL` in `.env` to `/api` for local development or to the API base URL when deploying. The backend must be running and connected to MySQL. There is no customer-facing or mock-data mode.
+```bash
+npm --prefix frontend install
+```
 
-## Main source files
+Run either frontend in a separate terminal:
 
-- `src/pages/Admin.jsx`: table status, bills, reservations, customers, memberships, and menu management.
-- `src/pages/Login.jsx`: Cashier sign-in.
-- `src/api.js`: authenticated admin API requests.
-- `src/styles.css`: application styles.
+```bash
+npm --prefix frontend run dev:staff
+npm --prefix frontend run dev:customer
+```
+
+The staff app uses port `5173`; the customer app uses port `5174`. Both proxy `/api` to the backend on port `3000`.
+
+Build both apps with:
+
+```bash
+npm --prefix frontend run build
+```
+
+## Customer table orders
+
+Customers choose an available table, add available menu items to a cart, and submit them to the kitchen. The backend returns a private order access token so that the same browser can add more items to the open order. The staff app can view and manage these open orders as usual.
+
+Apply `database/Migrations/001_customer_table_orders.sql` once to an existing database before using customer orders. New databases created from `database/Schema.sql` already include the required schema.
