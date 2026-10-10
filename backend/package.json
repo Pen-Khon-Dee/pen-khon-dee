@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "set-passwords": "node scripts/set-passwords.js"
+    "set-passwords": "node scripts/set-passwords.js",
+    "run-sql": "node scripts/run-sql.js",
+    "db:reset": "node scripts/run-sql.js ../database/Schema.sql ../database/Seed.sql && node scripts/set-passwords.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
