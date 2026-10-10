@@ -7,6 +7,7 @@ const { getBill } = require('../services/orders');
 const router = express.Router();
 
 // GET /api/tables : every table with its current order time and upcoming reservation
+// qr_token is included so the Cashier screen can print each table's permanent QR code
 router.get('/', requireAuth, requireRole('Cashier'), async (req, res, next) => {
   try {
     const [rows] = await pool.query(
@@ -14,6 +15,7 @@ router.get('/', requireAuth, requireRole('Cashier'), async (req, res, next) => {
               t.table_number,
               t.capacity,
               t.table_status,
+              t.qr_token,
               oo.order_id,
               oo.order_datetime,
               oo.order_datetime + INTERVAL ? MINUTE        AS should_leave_at,

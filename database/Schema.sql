@@ -53,7 +53,7 @@ CREATE TABLE employee (
   username       VARCHAR(50)   NOT NULL UNIQUE,
   email          VARCHAR(160)  NULL UNIQUE,
   password_hash  VARCHAR(255)  NOT NULL,           -- bcrypt hash, never the plain password
-  role           ENUM('Server','Cashier')   NOT NULL,
+  role           ENUM('Server','Cashier','Kitchen')  NOT NULL,
   status         ENUM('Active','Inactive')  NOT NULL DEFAULT 'Active'
 ) ENGINE=InnoDB;
 
@@ -66,6 +66,7 @@ CREATE TABLE dining_table (
   table_number  INT UNSIGNED      NOT NULL UNIQUE,
   capacity      TINYINT UNSIGNED  NOT NULL,
   table_status  ENUM('Available','Occupied') NOT NULL DEFAULT 'Available',
+  qr_token      CHAR(32)          NOT NULL UNIQUE,   -- permanent secret in the QR code printed on this table
   CONSTRAINT chk_table_capacity CHECK (capacity > 0)
 ) ENGINE=InnoDB;
 
@@ -73,7 +74,7 @@ CREATE TABLE reservation (
   reservation_id        INT UNSIGNED      AUTO_INCREMENT PRIMARY KEY,
   customer_id           INT UNSIGNED      NOT NULL,
   employee_id           INT UNSIGNED      NOT NULL,   -- Cashier who took the booking
-  reservation_datetime  DATETIME          NOT NULL,   -- holds the tables for 2 hours from this time
+  reservation_datetime  DATETIME          NOT NULL,   -- holds the tables for 4 hours from this time
   number_of_guests      TINYINT UNSIGNED  NOT NULL,
   reservation_status    ENUM('Confirmed','Seated','Cancelled','No-show')
                         NOT NULL DEFAULT 'Confirmed',
@@ -121,8 +122,7 @@ CREATE TABLE menu (
 CREATE TABLE orders (
   order_id         INT UNSIGNED   AUTO_INCREMENT PRIMARY KEY,
   customer_id      INT UNSIGNED   NULL,              -- NULL = anonymous walk-in
-  employee_id      INT UNSIGNED   NULL,              -- NULL for orders opened by customers
-  customer_order_token_hash CHAR(64) NULL UNIQUE,    -- grants a customer access to add items to their order
+  employee_id      INT UNSIGNED   NOT NULL,          -- Cashier who opened the order
   order_datetime   DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- time the guests were seated
   order_status     ENUM('Open','Closed','Cancelled') NOT NULL DEFAULT 'Open',
   payment_status   ENUM('Unpaid','Paid')             NOT NULL DEFAULT 'Unpaid',
@@ -152,7 +152,7 @@ CREATE TABLE order_item (
   quantity       INT UNSIGNED   NOT NULL,
   unit_price     DECIMAL(10,2)  NOT NULL,            -- copied from menu.price at order time
   subtotal       DECIMAL(10,2)  GENERATED ALWAYS AS (quantity * unit_price) STORED,
-  item_status    ENUM('Pending','Served','Cancelled') NOT NULL DEFAULT 'Pending',
+  item_status    ENUM('Pending','Ready','Served','Cancelled') NOT NULL DEFAULT 'Pending',  -- Pending -> Ready (kitchen) -> Served (server)
   note           VARCHAR(255)   NULL,
   CONSTRAINT chk_item_quantity CHECK (quantity > 0),
   CONSTRAINT fk_item_order FOREIGN KEY (order_id)

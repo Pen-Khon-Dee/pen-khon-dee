@@ -114,8 +114,9 @@ router.put('/:id', requireAuth, requireRole('Cashier'), async (req, res, next) =
   }
 });
 
-// PATCH /api/menu/:id/availability : Available / Sold_Out / Discontinued (Cashier)
-router.patch('/:id/availability', requireAuth, requireRole('Cashier'), async (req, res, next) => {
+// PATCH /api/menu/:id/availability : Available / Sold_Out / Discontinued (Cashier, Kitchen)
+// The kitchen knows first when something runs out, so it can mark items Sold_Out itself.
+router.patch('/:id/availability', requireAuth, requireRole('Cashier', 'Kitchen'), async (req, res, next) => {
   try {
     const status = req.body?.availability_status;
     if (!STATUSES.includes(status)) {

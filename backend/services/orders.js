@@ -118,4 +118,51 @@ async function lockOpenOrder(conn, orderId) {
   return order;
 }
 
-module.exports = { pool, withTransaction, httpError, recalcTotals, getBill, lockOpenOrder };
+const MAX_LINES = 20;     // different dishes in one request
+const MAX_QUANTITY = 20;  // of one dish in one request
+
+// Checks the items list sent by a customer. Returns an error message, or null if valid.
+function validateItems(items) {
+  if (!Array.isArray(items) || items.length === 0) return 'items must be a non-empty list';
+  if (items.length > MAX_LINES) return `You can send at most ${MAX_LINES} dishes at a time`;
+  for (const item of items) {
+    if (!Number.isInteger(item?.menu_id) || item.menu_id <= 0) return 'Each item needs a menu_id';
+    if (!Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > MAX_QUANTITY) {
+      return `Quantity must be between 1 and ${MAX_QUANTITY}`;
+    }
+    if (item.note != null && (typeof item.note !== 'string' || item.note.length > 255)) {
+      return 'note must be text of 255 characters or less';
+    }
+  }
+  return null;
+}
+
+// Adds items to an order that is already locked with lockOpenOrder.
+// Either every item is saved or none are. New items start as Pending and go to the kitchen.
+async function addItems(conn, orderId, items) {
+  const menuIds = [...new Set(items.map((i) => i.menu_id))];
+  const [menus] = await conn.query(
+    'SELECT menu_id, menu_name, price, availability_status FROM menu WHERE menu_id IN (?)',
+    [menuIds]
+  );
+  const byId = new Map(menus.map((m) => [m.menu_id, m]));
+
+  for (const item of items) {
+    const menu = byId.get(item.menu_id);
+    if (!menu) throw httpError(404, `Menu item ${item.menu_id} not found`);
+    if (menu.availability_status === 'Sold_Out') throw httpError(409, `${menu.menu_name} is sold out`);
+    if (menu.availability_status === 'Discontinued') throw httpError(409, `${menu.menu_name} is no longer sold`);
+  }
+
+  // unit_price is copied from the menu now, so later price changes do not affect this bill
+  await conn.query(
+    'INSERT INTO order_item (order_id, menu_id, quantity, unit_price, note) VALUES ?',
+    [items.map((i) => [orderId, i.menu_id, i.quantity, byId.get(i.menu_id).price, i.note?.trim() || null])]
+  );
+  await recalcTotals(conn, orderId);
+}
+
+module.exports = {
+  pool, withTransaction, httpError, recalcTotals, getBill, lockOpenOrder,
+  validateItems, addItems,
+};

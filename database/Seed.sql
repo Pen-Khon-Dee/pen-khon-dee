@@ -35,20 +35,22 @@ INSERT INTO employee (employee_id, name, phone, username, email, password_hash, 
 (2, 'Napa Wongsawat', '0891111002', 'cashier2', 'cashier2@penkhondee.com', 'SET_IN_STEP_3', 'Cashier', 'Active'),
 (3, 'Phum Rattanakul', '0891111003', 'server1',  'server1@penkhondee.com',  'SET_IN_STEP_3', 'Server',  'Active'),
 (4, 'Praew Siriwan', '0891111004', 'server2',  'server2@penkhondee.com',  'SET_IN_STEP_3', 'Server',  'Active'),
-(5, 'Ton Kaewmanee', '0891111005', 'server3',  'server3@penkhondee.com',  'SET_IN_STEP_3', 'Server',  'Inactive');  -- has resigned
+(5, 'Ton Kaewmanee', '0891111005', 'server3',  'server3@penkhondee.com',  'SET_IN_STEP_3', 'Server',  'Inactive'),  -- has resigned
+(6, 'Kitchen Screen', NULL,       'kitchen1', 'kitchen1@penkhondee.com', 'SET_IN_STEP_3', 'Kitchen', 'Active');    -- shared account for the kitchen display
 
 -- 10 tables: 2, 4, 7, 8 are occupied (matching the Open orders below)
-INSERT INTO dining_table (table_id, table_number, capacity, table_status) VALUES
-(1,  1, 2, 'Available'),
-(2,  2, 2, 'Occupied'),
-(3,  3, 4, 'Available'),
-(4,  4, 4, 'Occupied'),
-(5,  5, 4, 'Available'),
-(6,  6, 4, 'Available'),
-(7,  7, 6, 'Occupied'),
-(8,  8, 6, 'Occupied'),
-(9,  9, 8, 'Available'),
-(10, 10, 8, 'Available');
+-- qr_token is the permanent secret printed in each table's QR code (GET /api/tables shows them)
+INSERT INTO dining_table (table_id, table_number, capacity, table_status, qr_token) VALUES
+(1, 1, 2, 'Available', 'e467864fead0339e71eb0df23ca77df6'),
+(2, 2, 2, 'Occupied', '42d6a759197aa48dec1dc4635d0644e9'),
+(3, 3, 4, 'Available', '8c583a12c3c19f6030863863f42635e3'),
+(4, 4, 4, 'Occupied', 'c078cad7559a3d020497aa0f60751c32'),
+(5, 5, 4, 'Available', '98e5a5b96c13971d884a3154cbbbff87'),
+(6, 6, 4, 'Available', '3cf699d08d3ba7586e7b10655dacf2f5'),
+(7, 7, 6, 'Occupied', '8a8770462faa1e6d585ee44e09987dd5'),
+(8, 8, 6, 'Occupied', 'bc614379d5a32c8fa4d97566320c63e0'),
+(9, 9, 8, 'Available', '5583b6ed3f7395a074b1bf737fdef7b4'),
+(10, 10, 8, 'Available', '09a0da64f1cb4942201e5fd8681ae110');
 
 INSERT INTO category (category_id, category_name) VALUES
 (1, 'Main Dishes'),
@@ -98,8 +100,8 @@ INSERT INTO orders (order_id, customer_id, employee_id, order_datetime, order_st
 (8,  5,    2, CURDATE() - INTERVAL 1 DAY + INTERVAL 18 HOUR + INTERVAL 5 MINUTE,
                                         'Closed', 'Paid',   0.00,  168.00),  -- from reservation #1, not a member
 (9,  NULL, 1, NOW() - INTERVAL 50 MINUTE,  'Open', 'Unpaid', 0.00,  233.00),  -- normal
-(10, 4,    2, NOW() - INTERVAL 115 MINUTE, 'Open', 'Unpaid', 0.00,  238.00),  -- almost out of time (yellow)
-(11, NULL, 1, NOW() - INTERVAL 130 MINUTE, 'Open', 'Unpaid', 0.00,  373.00);  -- over time (red)
+(10, 4,    2, NOW() - INTERVAL 230 MINUTE, 'Open', 'Unpaid', 0.00,  238.00),  -- almost out of time (yellow)
+(11, NULL, 1, NOW() - INTERVAL 250 MINUTE, 'Open', 'Unpaid', 0.00,  373.00);  -- over time (red)
 
 INSERT INTO order_table (order_id, table_id) VALUES
 (1, 5), (1, 6),            -- combined tables
@@ -121,7 +123,7 @@ INSERT INTO order_item (order_id, menu_id, quantity, unit_price, item_status, no
 (7, 3, 2,  99.00, 'Served', NULL), (7, 6, 1,  79.00, 'Served', NULL), (7, 9, 2,  45.00, 'Served', NULL),
 (7, 14, 2, 59.00, 'Served', NULL),
 (8, 2, 2,  69.00, 'Served', NULL), (8, 11, 2, 15.00, 'Served', NULL),
-(9, 1, 1,  89.00, 'Served',  NULL), (9, 9, 1, 45.00, 'Served', NULL), (9, 13, 1, 99.00, 'Pending', NULL),
+(9, 1, 1,  89.00, 'Served',  NULL), (9, 9, 1, 45.00, 'Served', NULL), (9, 13, 1, 99.00, 'Ready', NULL),
 (10, 2, 2, 69.00, 'Served',  NULL), (10, 4, 1, 59.00, 'Cancelled', 'Sold out after ordering'),
 (10, 10, 2, 50.00, 'Served', NULL),
 (11, 5, 1, 129.00, 'Served', NULL), (11, 7, 1, 109.00, 'Pending', NULL), (11, 9, 3, 45.00, 'Served', NULL);
@@ -139,17 +141,17 @@ INSERT INTO point_transaction (member_id, order_id, points, type, transaction_da
 -- Checks to run afterwards (each query can be executed on its own)
 -- =====================================================================
 
--- Report 1: which tables are free now + time seated + reservations in the next 2 hours
+-- Report 1: which tables are free now + time seated + reservations in the next 4 hours
 SELECT t.table_number,
        t.table_status,
        TIMESTAMPDIFF(MINUTE, oo.order_datetime, NOW()) AS minutes_seated,
-       oo.order_datetime + INTERVAL 2 HOUR             AS should_leave_at,
+       oo.order_datetime + INTERVAL 4 HOUR             AS should_leave_at,
        (SELECT MIN(r.reservation_datetime)
           FROM reservation r
           JOIN reservation_table rt ON rt.reservation_id = r.reservation_id
          WHERE rt.table_id = t.table_id
            AND r.reservation_status = 'Confirmed'
-           AND r.reservation_datetime BETWEEN NOW() AND NOW() + INTERVAL 2 HOUR
+           AND r.reservation_datetime BETWEEN NOW() AND NOW() + INTERVAL 4 HOUR
        ) AS upcoming_reservation
 FROM dining_table t
 LEFT JOIN (SELECT ot.table_id, o.order_datetime

@@ -9,7 +9,10 @@ const router = express.Router();
 
 const isPositiveInt = (n) => Number.isInteger(n) && n > 0;
 
+// Customers add items themselves through the QR code: see routes/qr.js
+
 // POST /api/orders : open an order for one or more tables (Cashier)
+// Once the order is open, guests can order with the permanent QR code on their table.
 router.post('/', requireAuth, requireRole('Cashier'), async (req, res, next) => {
   try {
     const tableIds = req.body?.table_ids;
@@ -55,7 +58,7 @@ router.post('/', requireAuth, requireRole('Cashier'), async (req, res, next) => 
   }
 });
 
-// GET /api/orders/open : every open order (Cashier and Server)
+// GET /api/orders/open : every open order (any staff)
 router.get('/open', requireAuth, async (req, res, next) => {
   try {
     const [rows] = await pool.query(
@@ -63,7 +66,9 @@ router.get('/open', requireAuth, async (req, res, next) => {
               GROUP_CONCAT(t.table_number ORDER BY t.table_number) AS table_numbers,
               o.order_datetime, o.payment_status, o.total_amount,
               (SELECT COUNT(*) FROM order_item oi
-                WHERE oi.order_id = o.order_id AND oi.item_status = 'Pending') AS pending_items
+                WHERE oi.order_id = o.order_id AND oi.item_status = 'Pending') AS pending_items,
+              (SELECT COUNT(*) FROM order_item oi
+                WHERE oi.order_id = o.order_id AND oi.item_status = 'Ready') AS ready_items
          FROM orders o
          JOIN order_table ot ON ot.order_id = o.order_id
          JOIN dining_table t ON t.table_id = ot.table_id
@@ -72,57 +77,6 @@ router.get('/open', requireAuth, async (req, res, next) => {
         ORDER BY o.order_datetime`
     );
     res.json(rows.map((r) => ({ ...r, table_numbers: r.table_numbers.split(',').map(Number) })));
-  } catch (err) {
-    next(err);
-  }
-});
-
-// POST /api/orders/:id/items : add items to an order (Server)
-// Either every item is saved or none are.
-router.post('/:id/items', requireAuth, requireRole('Server'), async (req, res, next) => {
-  try {
-    const items = req.body?.items;
-    if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: 'items must be a non-empty list' });
-    }
-    for (const item of items) {
-      if (!isPositiveInt(item.menu_id) || !isPositiveInt(item.quantity)) {
-        return res.status(400).json({ error: 'Each item needs a menu_id and a quantity of 1 or more' });
-      }
-      if (item.note != null && (typeof item.note !== 'string' || item.note.length > 255)) {
-        return res.status(400).json({ error: 'note must be text of 255 characters or less' });
-      }
-    }
-
-    const bill = await withTransaction(async (conn) => {
-      await lockOpenOrder(conn, req.params.id);
-
-      const menuIds = [...new Set(items.map((i) => i.menu_id))];
-      const [menus] = await conn.query(
-        'SELECT menu_id, menu_name, price, availability_status FROM menu WHERE menu_id IN (?)',
-        [menuIds]
-      );
-      const byId = new Map(menus.map((m) => [m.menu_id, m]));
-
-      for (const item of items) {
-        const menu = byId.get(item.menu_id);
-        if (!menu) throw httpError(404, `Menu item ${item.menu_id} not found`);
-        if (menu.availability_status === 'Sold_Out') throw httpError(409, `${menu.menu_name} is sold out`);
-        if (menu.availability_status === 'Discontinued') throw httpError(409, `${menu.menu_name} is no longer sold`);
-      }
-
-      // unit_price is copied from the menu now, so later price changes do not affect this bill
-      await conn.query(
-        'INSERT INTO order_item (order_id, menu_id, quantity, unit_price, note) VALUES ?',
-        [items.map((i) => [
-          req.params.id, i.menu_id, i.quantity, byId.get(i.menu_id).price, i.note?.trim() || null,
-        ])]
-      );
-      await recalcTotals(conn, req.params.id);
-      return getBill(conn, req.params.id);
-    });
-
-    res.status(201).json(bill);
   } catch (err) {
     next(err);
   }
@@ -165,15 +119,15 @@ router.post('/:id/pay', requireAuth, requireRole('Cashier'), async (req, res, ne
       await lockOpenOrder(conn, orderId);
 
       const [[counts]] = await conn.query(
-        `SELECT SUM(item_status = 'Pending')   AS pending,
-                SUM(item_status <> 'Cancelled') AS billable
+        `SELECT SUM(item_status IN ('Pending', 'Ready')) AS unserved,
+                SUM(item_status <> 'Cancelled')         AS billable
            FROM order_item WHERE order_id = ?`,
         [orderId]
       );
       if (!Number(counts.billable)) {
         throw httpError(409, 'This order has no items to pay for. Cancel it instead');
       }
-      if (Number(counts.pending)) {
+      if (Number(counts.unserved)) {
         throw httpError(409, 'Some items have not been served yet. Serve or cancel them first');
       }
 
@@ -248,19 +202,20 @@ router.post('/:id/pay', requireAuth, requireRole('Cashier'), async (req, res, ne
   }
 });
 
-// POST /api/orders/:id/cancel : cancel an order that has nothing served yet (Cashier)
+// POST /api/orders/:id/cancel : cancel an order whose food has not been cooked yet (Cashier)
+// Allowed only while every item is still Pending or Cancelled.
 router.post('/:id/cancel', requireAuth, requireRole('Cashier'), async (req, res, next) => {
   try {
     const result = await withTransaction(async (conn) => {
       const orderId = req.params.id;
       await lockOpenOrder(conn, orderId);
 
-      const [[served]] = await conn.query(
-        "SELECT COUNT(*) AS n FROM order_item WHERE order_id = ? AND item_status = 'Served'",
+      const [[cooked]] = await conn.query(
+        "SELECT COUNT(*) AS n FROM order_item WHERE order_id = ? AND item_status IN ('Ready', 'Served')",
         [orderId]
       );
-      if (served.n > 0) {
-        throw httpError(409, 'Cannot cancel an order with served items');
+      if (cooked.n > 0) {
+        throw httpError(409, 'Cannot cancel an order with items that are ready or served');
       }
 
       await conn.query(
