@@ -1,11 +1,5 @@
 import { useEffect } from 'react';
-import { Link, Route, Routes, useLocation } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Home from './pages/Home';
-import Menu from './pages/Menu';
-import Reservation from './pages/Reservation';
-import Register from './pages/Register';
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Admin from './pages/Admin';
 
@@ -23,11 +17,11 @@ function NotFound() {
       <div className="container">
         <h1 className="display">404 - Page Not Found</h1>
         <p className="prose" style={{ marginTop: '1rem' }}>
-          The page you are looking for does not exist or has been moved.
+          The page you are looking for could not be found.
         </p>
         <p style={{ marginTop: '2rem' }}>
-          <Link to="/" className="btn btn--dark">
-            Go to Home
+          <Link to="/admin" className="btn btn--dark">
+            Go to Admin
           </Link>
         </p>
       </div>
@@ -39,22 +33,17 @@ export default function App() {
   return (
     <>
       <a href="#main" className="skip">
-        ข้ามไปยังเนื้อหา
+        Skip to content
       </a>
       <ScrollToTop />
-      <Navbar />
       <main id="main">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/menu" element={<Menu />} />
-          <Route path="/reservation" element={<Reservation />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Navigate to="/admin" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      <Footer />
     </>
   );
 }

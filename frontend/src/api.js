@@ -1,17 +1,4 @@
-import { menuItems } from './data/menu';
-
 const BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
-const MOCK = import.meta.env.VITE_USE_MOCK === 'true';
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const read = (key, fallback) => {
-  try {
-    return JSON.parse(localStorage.getItem(key)) ?? fallback;
-  } catch {
-    return fallback;
-  }
-};
-const write = (key, value) => localStorage.setItem(key, JSON.stringify(value));
 
 async function request(path, { method = 'GET', body, token } = {}) {
   let res;
@@ -25,73 +12,30 @@ async function request(path, { method = 'GET', body, token } = {}) {
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new Error('Can not connect to the server. Please check your internet connection and try again.');
+    throw new Error('Unable to connect to the API. Please make sure the backend is running.');
   }
-  const data = await res.json().catch(() => ({}));
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    if (!res.ok && res.status >= 500) {
+      throw new Error('The API is unavailable. Please start the backend and check its database connection.');
+    }
+    throw new Error('The API returned an invalid response.');
+  }
   if (!res.ok) {
     throw new Error(data.message || data.error || 'An error occurred. Please try again.');
   }
   return data;
 }
 
-/* ---------- GET /api/menu ---------- */
-export async function getMenu() {
-  if (MOCK) {
-    await sleep(250);
-    return menuItems;
-  }
-  return request('/menu');
-}
-
-/* ---------- POST /api/auth/register ---------- */
-export async function register({ name, email, phone, password }) {
-  if (MOCK) {
-    await sleep(500);
-    const users = read('nero_mock_users', []);
-    const key = email.trim().toLowerCase();
-    if (users.some((u) => u.email === key)) {
-      throw new Error('This email is already registered.');
-    }
-    const user = { id: Date.now(), name, email: key, phone, password };
-    write('nero_mock_users', [...users, user]);
-    return { message: 'Registration successful.' };
-  }
-  return request('/auth/register', {
+/* ---------- Admin API ---------- */
+export function adminLogin({ identifier, password }) {
+  const key = identifier.includes('@') ? 'email' : 'username';
+  return request('/auth/login', {
     method: 'POST',
-    body: { name, email, phone, password },
+    body: { [key]: identifier, password },
   });
-}
-
-/* ---------- POST /api/auth/login ---------- */
-export async function login({ email, password }) {
-  if (MOCK) {
-    await sleep(500);
-    const key = email.trim().toLowerCase();
-    const found = read('nero_mock_users', []).find(
-      (u) => u.email === key && u.password === password
-    );
-    if (!found) throw new Error('Invalid email or password.');
-    const { password: _omit, ...user } = found;
-    return { token: `mock-${user.id}`, user };
-  }
-  return request('/auth/login', { method: 'POST', body: { email, password } });
-}
-
-/* ---------- POST /api/reservations ---------- */
-export async function createReservation(payload, token) {
-  if (MOCK) {
-    await sleep(600);
-    const code = `NR-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-    const booking = { id: Date.now(), code, ...payload };
-    write('nero_mock_bookings', [...read('nero_mock_bookings', []), booking]);
-    return booking;
-  }
-  return request('/reservations', { method: 'POST', body: payload, token });
-}
-
-/* ---------- Cashier admin ---------- */
-export function adminLogin({ email, password }) {
-  return request('/auth/login', { method: 'POST', body: { email, password } });
 }
 
 export function getAdminSession(token) {
@@ -116,12 +60,64 @@ export function setAdminMenuAvailability(id, availability_status, token) {
   });
 }
 
+export function updateAdminMenuItem(id, payload, token) {
+  return request(`/menu/${id}`, { method: 'PUT', body: payload, token });
+}
+
+export function addAdminCategory(category_name, token) {
+  return request('/categories', { method: 'POST', body: { category_name }, token });
+}
+
+export function renameAdminCategory(id, category_name, token) {
+  return request(`/categories/${id}`, { method: 'PUT', body: { category_name }, token });
+}
+
 export function getAdminReservations(date, token) {
   return request(`/reservations?date=${encodeURIComponent(date)}`, { token });
+}
+
+export function createAdminReservation(payload, token) {
+  return request('/reservations', { method: 'POST', body: payload, token });
 }
 
 export function setAdminReservationStatus(id, reservation_status, token) {
   return request(`/reservations/${id}`, {
     method: 'PATCH', body: { reservation_status }, token,
   });
+}
+
+export function getAdminCustomer(phone, token) {
+  return request(`/customers?phone=${encodeURIComponent(phone)}`, { token });
+}
+
+export function createAdminCustomer(payload, token) {
+  return request('/customers', { method: 'POST', body: payload, token });
+}
+
+export function enrollAdminMember(customer_id, token) {
+  return request('/members', { method: 'POST', body: { customer_id }, token });
+}
+
+export function getAdminTables(token) {
+  return request('/tables', { token });
+}
+
+export function createAdminOrder(table_ids, token) {
+  return request('/orders', { method: 'POST', body: { table_ids }, token });
+}
+
+export function getAdminTableOrder(tableNumber, token) {
+  return request(`/tables/${tableNumber}/order`, { token });
+}
+
+export function setAdminOrderCustomer(id, phone, token) {
+  return request(`/orders/${id}/customer`, { method: 'PATCH', body: { phone }, token });
+}
+
+export function payAdminOrder(id, token) {
+  return request(`/orders/${id}/pay`, { method: 'POST', token });
+}
+
+export function cancelAdminOrder(id, token) {
+  return request(`/orders/${id}/cancel`, { method: 'POST', token });
 }
