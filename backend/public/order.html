@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pen Khon Dee - Order</title>
+<style>
+  :root {
+    --green: #2f4a3c; --bg: #f5f3ee; --card: #ffffff; --text: #1d1d1b; --muted: #6b6b66;
+    --line: #e2dfd7; --red-bg: #f6e3e1; --red: #9a3b30; --amber-bg: #fbf0d9; --amber: #8a5a00;
+    --ok-bg: #e3efe6; --ok: #2f6b45;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { background: var(--green); color: #fff; text-align: center; padding: 22px 16px;
+           letter-spacing: .25em; font-weight: 600; font-size: 15px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 16px 64px;
+         display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: start; }
+  @media (max-width: 820px) { main { grid-template-columns: 1fr; } }
+  h1 { font-size: clamp(30px, 5vw, 44px); margin: 0 0 6px; font-weight: 600; }
+  .sub { color: var(--muted); margin: 0 0 22px; }
+  .banner { padding: 14px 16px; border-radius: 8px; margin: 0 0 20px; }
+  .banner.error { background: var(--red-bg); color: var(--red); }
+  .banner.wait { background: var(--amber-bg); color: var(--amber); }
+  .banner.ok { background: var(--ok-bg); color: var(--ok); }
+  .hidden { display: none !important; }
+  .tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--line); margin-bottom: 8px;
+          overflow-x: auto; }
+  .tab { background: none; border: 0; padding: 12px 0; font: inherit; color: var(--muted);
+         cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tab.active { color: var(--text); border-bottom-color: var(--text); }
+  .dish { display: flex; justify-content: space-between; align-items: center; gap: 12px;
+          padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .dish .name { font-weight: 500; }
+  .dish .price { color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .dish.soldout .name, .dish.soldout .price { color: #aaa; }
+  .tag { font-size: 12px; color: var(--red); margin-left: 6px; }
+  button.add { border: 1px solid var(--green); background: #fff; color: var(--green);
+               border-radius: 999px; padding: 7px 16px; font: inherit; cursor: pointer; }
+  button.add:disabled { border-color: #ccc; color: #aaa; cursor: not-allowed; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px;
+          margin-bottom: 20px; }
+  .card h2 { font-size: 20px; margin: 0 0 14px; font-weight: 600; }
+  .empty { color: var(--muted); font-size: 14px; margin: 0; }
+  .line { display: flex; justify-content: space-between; align-items: center; gap: 8px;
+          padding: 8px 0; font-size: 14px; }
+  .qty { display: flex; align-items: center; gap: 8px; }
+  .qty button { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line);
+                background: #fff; cursor: pointer; font-size: 15px; line-height: 1; }
+  .total { display: flex; justify-content: space-between; font-weight: 600;
+           border-top: 1px solid var(--line); margin-top: 10px; padding-top: 12px; }
+  textarea { width: 100%; margin-top: 12px; border: 1px solid var(--line); border-radius: 8px;
+             padding: 8px; font: inherit; font-size: 14px; resize: vertical; }
+  button.send { width: 100%; margin-top: 12px; background: var(--green); color: #fff; border: 0;
+                border-radius: 8px; padding: 12px; font: inherit; font-weight: 600; cursor: pointer; }
+  button.send:disabled { background: #9aa79f; cursor: not-allowed; }
+  .status { font-size: 12px; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .s-Pending { background: var(--amber-bg); color: var(--amber); }
+  .s-Ready { background: #e2ebf6; color: #2b5a8a; }
+  .s-Served { background: var(--ok-bg); color: var(--ok); }
+  .s-Cancelled { background: #eee; color: #888; text-decoration: line-through; }
+</style>
+</head>
+<body>
+<header>PEN KHON DEE</header>
+<main>
+  <section>
+    <h1 id="title">Order from your table</h1>
+    <p class="sub">Choose your dishes and we'll bring them over.</p>
+    <div id="banner" class="banner hidden"></div>
+    <div id="tabs" class="tabs"></div>
+    <div id="menu"></div>
+  </section>
+
+  <aside>
+    <div class="card">
+      <h2>Your cart</h2>
+      <div id="cart"></div>
+      <textarea id="note" rows="2" maxlength="255" placeholder="Note for the kitchen (optional), e.g. no peanuts"></textarea>
+      <button id="send" class="send" disabled>Send order to kitchen</button>
+    </div>
+    <div class="card">
+      <h2>Ordered so far</h2>
+      <div id="ordered"><p class="empty">Nothing ordered yet.</p></div>
+    </div>
+  </aside>
+</main>
+
+<script>
+  // The table is identified by the secret token in the link (the same link its QR code holds)
+  const token = decodeURIComponent(location.pathname.split('/').filter(Boolean).pop() || '');
+  const api = (p, opts) => fetch('/api/qr/' + encodeURIComponent(token) + p, opts)
+    .then(async (r) => {
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(body.error || 'Something went wrong');
+      return body;
+    });
+
+  let categories = [];
+  let activeCat = null;
+  let canOrder = false;
+  const cart = new Map(); // menu_id -> { menu_name, price, quantity }
+
+  const $ = (id) => document.getElementById(id);
+  const baht = (n) => '฿' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function banner(kind, text) {
+    const b = $('banner');
+    if (!kind) { b.className = 'banner hidden'; return; }
+    b.className = 'banner ' + kind;
+    b.textContent = text;
+  }
+
+  async function loadMenu() {
+    try {
+      const data = await api('/menu');
+      canOrder = data.can_order;
+      categories = data.categories;
+      $('title').textContent = 'Table ' + data.table_number;
+      if (!canOrder) banner('wait', 'This table is not open yet. Please ask our staff to seat you. You can look at the menu meanwhile.');
+      else if ($('banner').classList.contains('wait')) banner(null);
+      if (activeCat == null && categories.length) activeCat = categories[0].category_id;
+      renderMenu();
+      renderCart();
+    } catch (err) {
+      banner('error', err.message);
+    }
+  }
+
+  async function loadOrdered() {
+    if (!canOrder) { $('ordered').replaceChildren(el('p', 'empty', 'Nothing ordered yet.')); return; }
+    try {
+      const view = await api('');
+      const box = $('ordered');
+      box.replaceChildren();
+      if (!view.items.length) { box.append(el('p', 'empty', 'Nothing ordered yet.')); return; }
+      for (const it of view.items) {
+        const row = el('div', 'line');
+        row.append(el('span', null, it.quantity + ' × ' + it.menu_name), el('span', 'status s-' + it.item_status, it.item_status));
+        box.append(row);
+      }
+      const t = el('div', 'total');
+      t.append(el('span', null, 'Total'), el('span', null, baht(view.total_amount)));
+      box.append(t);
+    } catch (err) { /* table closed after payment: menu reload will show it */ }
+  }
+
+  function renderMenu() {
+    const tabs = $('tabs');
+    tabs.replaceChildren();
+    for (const c of categories) {
+      const b = el('button', 'tab' + (c.category_id === activeCat ? ' active' : ''), c.category_name);
+      b.onclick = () => { activeCat = c.category_id; renderMenu(); };
+      tabs.append(b);
+    }
+    const menu = $('menu');
+    menu.replaceChildren();
+    const cat = categories.find((c) => c.category_id === activeCat);
+    if (!cat) { menu.append(el('p', 'empty', "The menu isn't available right now.")); return; }
+    for (const d of cat.items) {
+      const soldOut = d.availability_status === 'Sold_Out';
+      const row = el('div', 'dish' + (soldOut ? ' soldout' : ''));
+      const info = el('div');
+      const name = el('div', 'name', d.menu_name);
+      if (soldOut) name.append(el('span', 'tag', 'Sold out'));
+      info.append(name, el('div', 'price', baht(d.price)));
+      const add = el('button', 'add', 'Add');
+      add.disabled = soldOut || !canOrder;
+      add.onclick = () => {
+        const cur = cart.get(d.menu_id) || { menu_name: d.menu_name, price: d.price, quantity: 0 };
+        if (cur.quantity < 20) cur.quantity++;
+        cart.set(d.menu_id, cur);
+        renderCart();
+      };
+      row.append(info, add);
+      menu.append(row);
+    }
+  }
+
+  function renderCart() {
+    const box = $('cart');
+    box.replaceChildren();
+    if (!cart.size) {
+      box.append(el('p', 'empty', 'Nothing here yet. Add dishes from the menu.'));
+      $('send').disabled = true;
+      return;
+    }
+    let sum = 0;
+    for (const [id, it] of cart) {
+      sum += it.price * it.quantity;
+      const row = el('div', 'line');
+      const qty = el('div', 'qty');
+      const minus = el('button', null, '−');
+      const plus = el('button', null, '+');
+      minus.onclick = () => { it.quantity--; if (!it.quantity) cart.delete(id); renderCart(); };
+      plus.onclick = () => { if (it.quantity < 20) it.quantity++; renderCart(); };
+      qty.append(minus, el('span', null, String(it.quantity)), plus);
+      row.append(el('span', null, it.menu_name), qty);
+      box.append(row);
+    }
+    const t = el('div', 'total');
+    t.append(el('span', null, 'Cart total'), el('span', null, baht(sum)));
+    box.append(t);
+    $('send').disabled = !canOrder;
+  }
+
+  $('send').onclick = async () => {
+    const note = $('note').value.trim();
+    const items = [...cart].map(([menu_id, it], i) => ({
+      menu_id, quantity: it.quantity, ...(note && i === 0 ? { note } : {}),
+    }));
+    $('send').disabled = true;
+    try {
+      await api('/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items }),
+      });
+      cart.clear();
+      $('note').value = '';
+      banner('ok', 'Order sent to the kitchen. Thank you!');
+      renderCart();
+      loadOrdered();
+    } catch (err) {
+      banner('error', err.message);
+      $('send').disabled = false;
+      loadMenu(); // e.g. a dish just sold out
+    }
+  };
+
+  // First load, then refresh every 10 seconds so the table opening and item status show up
+  loadMenu().then(loadOrdered);
+  setInterval(() => loadMenu().then(loadOrdered), 10000);
+</script>
+</body>
+</html>

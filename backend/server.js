@@ -4,22 +4,7 @@ const cors = require('cors');
 const pool = require('./db');
 
 const app = express();
-const corsOrigins = (process.env.CORS_ORIGINS || '')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
-if (process.env.NODE_ENV === 'production' && corsOrigins.length === 0) {
-  throw new Error('CORS_ORIGINS must contain the deployed frontend URLs in production.');
-}
-
-app.use(cors(corsOrigins.length
-  ? {
-    origin(origin, callback) {
-      callback(null, !origin || corsOrigins.includes(origin));
-    },
-  }
-  : undefined));
+app.use(cors());
 app.use(express.json());
 
 // Health check: confirms the backend is running and connected to the database
@@ -32,6 +17,13 @@ app.get('/api/health', async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+// Customer ordering page: the link each table's QR code points to.
+// Open http://localhost:3000/order/<table qr_token> to order as that table's customer.
+const path = require('path');
+app.get('/order/:token', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'order.html'));
 });
 
 // Routes
