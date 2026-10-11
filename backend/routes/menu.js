@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('../db');
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { getCustomerMenu } = require('../services/menu');
 
 const router = express.Router();
 
@@ -38,6 +39,16 @@ async function validateMenu(body, partial) {
   }
   return null;
 }
+
+// GET /api/menu/public : menu for anyone, no login (e.g. the website's menu page).
+// Grouped by category, discontinued items hidden. Ordering still needs the table's QR code.
+router.get('/public', async (req, res, next) => {
+  try {
+    res.json(await getCustomerMenu());
+  } catch (err) {
+    next(err);
+  }
+});
 
 // GET /api/menu : menu list (Cashier and Server)
 //   ?category_id=1             only that category

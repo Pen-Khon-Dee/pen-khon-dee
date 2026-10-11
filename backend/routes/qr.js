@@ -5,6 +5,7 @@ const express = require('express');
 const {
   pool, withTransaction, httpError, lockOpenOrder, validateItems, addItems,
 } = require('../services/orders');
+const { getCustomerMenu } = require('../services/menu');
 
 const router = express.Router();
 
@@ -52,6 +53,28 @@ async function customerView(conn, orderId) {
   };
 }
 
+// GET /api/qr/tables : DEMO ONLY. Lists every table with its QR token so the customer page can
+// show a "Choose a table" dropdown instead of scanning a real QR code. Picking a table gives the
+// page that table's token, and then it uses the same /api/qr/:token routes as a real scan.
+// Turn off for real use with DEMO_TABLE_PICKER=false (otherwise anyone could order for any table).
+// Must stay above '/:token' so "tables" is not read as a token.
+router.get('/tables', async (req, res, next) => {
+  try {
+    if (process.env.DEMO_TABLE_PICKER === 'false') throw httpError(404, 'Endpoint not found');
+    const [rows] = await pool.query(
+      `SELECT t.table_number, t.capacity, t.qr_token,
+              EXISTS (SELECT 1 FROM order_table ot JOIN orders o ON o.order_id = ot.order_id
+                       WHERE ot.table_id = t.table_id
+                         AND o.order_status = 'Open' AND o.payment_status = 'Unpaid') AS can_order
+         FROM dining_table t
+        ORDER BY t.table_number`
+    );
+    res.json(rows.map((r) => ({ ...r, can_order: Boolean(r.can_order) })));
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/qr/:token : the table's current order (what has been ordered and its status)
 router.get('/:token', async (req, res, next) => {
   try {
@@ -62,31 +85,28 @@ router.get('/:token', async (req, res, next) => {
   }
 });
 
-// GET /api/qr/:token/menu : menu grouped by category. Discontinued items are hidden,
-// sold-out items are shown so the page can grey them out.
+// GET /api/qr/:token/menu : the table number and the menu grouped by category.
+// Works as soon as the QR code is scanned, even before the cashier opens the table,
+// so guests can browse right away. can_order tells the page whether to show the Order button.
 router.get('/:token/menu', async (req, res, next) => {
   try {
-    await findOrderByToken(pool, req.params.token);
-    const [rows] = await pool.query(
-      `SELECT c.category_id, c.category_name, m.menu_id, m.menu_name, m.price, m.availability_status
-         FROM menu m JOIN category c ON c.category_id = m.category_id
-        WHERE m.availability_status <> 'Discontinued'
-        ORDER BY c.category_id, m.menu_id`
+    const token = req.params.token;
+    if (!TOKEN.test(token)) throw httpError(404, 'This QR code is not valid');
+    const [[table]] = await pool.query(
+      `SELECT t.table_number,
+              EXISTS (SELECT 1 FROM order_table ot JOIN orders o ON o.order_id = ot.order_id
+                       WHERE ot.table_id = t.table_id
+                         AND o.order_status = 'Open' AND o.payment_status = 'Unpaid') AS can_order
+         FROM dining_table t WHERE t.qr_token = ?`,
+      [token]
     );
+    if (!table) throw httpError(404, 'This QR code is not valid');
 
-    const categories = new Map();
-    for (const r of rows) {
-      if (!categories.has(r.category_id)) {
-        categories.set(r.category_id, { category_id: r.category_id, category_name: r.category_name, items: [] });
-      }
-      categories.get(r.category_id).items.push({
-        menu_id: r.menu_id,
-        menu_name: r.menu_name,
-        price: r.price,
-        availability_status: r.availability_status,
-      });
-    }
-    res.json([...categories.values()]);
+    res.json({
+      table_number: table.table_number,
+      can_order: Boolean(table.can_order),
+      categories: await getCustomerMenu(),
+    });
   } catch (err) {
     next(err);
   }
