@@ -168,10 +168,19 @@ CREATE TABLE order_item (
 CREATE TABLE point_transaction (
   point_transaction_id  INT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
   member_id             INT UNSIGNED  NOT NULL,
-  order_id              INT UNSIGNED  NOT NULL,
+  order_id              INT UNSIGNED  NULL,          -- NULL for a manual Adjust that is not tied to a bill
   points                INT           NOT NULL,      -- Adjust may be negative
   type                  ENUM('Earn','Adjust') NOT NULL DEFAULT 'Earn',
   transaction_date      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  -- Copy of order_id for Earn rows only (NULL for Adjust). The UNIQUE key on it means
+  -- one bill can give points only once, while Adjust rows are not limited.
+  earn_order_id         INT UNSIGNED  GENERATED ALWAYS AS (IF(type = 'Earn', order_id, NULL)) STORED,
+  CONSTRAINT uq_pt_earn_once UNIQUE (earn_order_id),
+  -- Earn must come from a bill and give positive points; Adjust may be any non-zero amount
+  CONSTRAINT chk_pt_earn CHECK (
+    (type = 'Earn'   AND order_id IS NOT NULL AND points > 0) OR
+    (type = 'Adjust' AND points <> 0)
+  ),
   CONSTRAINT fk_pt_member FOREIGN KEY (member_id) REFERENCES member(member_id),
   CONSTRAINT fk_pt_order  FOREIGN KEY (order_id)  REFERENCES orders(order_id)
 ) ENGINE=InnoDB;
