@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Field from '../components/Field';
+import Wordmark from '../components/Wordmark';
 import { adminLogin } from '../api';
+import { saveSession } from '../lib/session';
 
-const ADMIN_SESSION_KEY = 'pen_khon_dee_cashier';
+function pathForRole(role) {
+  if (role === 'Kitchen') return '/kitchen';
+  if (role === 'Server') return '/server';
+  return '/admin/tables';
+}
 
 export default function Login() {
   const navigate = useNavigate();
@@ -35,14 +41,8 @@ export default function Login() {
         identifier: values.identifier.trim(),
         password: values.password,
       });
-      if (data.employee?.role !== 'Cashier') {
-        throw new Error('This account does not have permission to access the admin dashboard.');
-      }
-      sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({
-        token: data.token,
-        employee: data.employee,
-      }));
-      navigate('/admin', { replace: true });
+      saveSession({ token: data.token, employee: data.employee });
+      navigate(pathForRole(data.employee?.role), { replace: true });
     } catch (err) {
       setSubmitError(err.message);
     } finally {
@@ -51,36 +51,23 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-split">
-      <aside className="auth-split__aside">
-        <p className="auth-split__quote">Staff access</p>
-        <p className="auth-split__text">Sign in with your cashier email or username to manage tables, bills, reservations, and menu items.</p>
-      </aside>
+    <main id="main" className="login">
+      <div className="login__panel">
+        <Wordmark className="wordmark--lg" />
+        <h1 className="login__title">Staff sign in</h1>
+        <p className="login__lead">Sign in with your staff account to open the tools for your role.</p>
 
-      <div className="auth-split__main">
-        <div className="auth-box">
-          <h1 className="auth-box__title">Staff Login</h1>
+        {location.state?.message && <p className="banner banner--ok" role="status"><span>{location.state.message}</span></p>}
+        {submitError && <p className="banner banner--error" role="alert"><span>{submitError}</span></p>}
 
-          {location.state?.message && (
-            <p className="alert alert--ok" role="status">
-              {location.state.message}
-            </p>
-          )}
-
-          <form className="form" onSubmit={onSubmit} noValidate>
-            {submitError && (
-              <p className="alert alert--error" role="alert">
-                {submitError}
-              </p>
-            )}
-            <Field label="Email or username" name="identifier" type="text" value={values.identifier} onChange={onChange} error={errors.identifier} autoComplete="username" />
-            <Field label="Password" name="password" type="password" value={values.password} onChange={onChange} error={errors.password} autoComplete="current-password" />
-            <button type="submit" className="btn btn--dark btn--block" disabled={loading}>
-              {loading ? 'Signing in…' : 'Sign In'}
-            </button>
-          </form>
-        </div>
+        <form className="form" onSubmit={onSubmit} noValidate>
+          <Field label="Email or username" name="identifier" type="text" value={values.identifier} onChange={onChange} error={errors.identifier} autoComplete="username" />
+          <Field label="Password" name="password" type="password" value={values.password} onChange={onChange} error={errors.password} autoComplete="current-password" />
+          <button type="submit" className="btn btn--primary btn--block" disabled={loading}>
+            {loading ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
       </div>
-    </div>
+    </main>
   );
 }

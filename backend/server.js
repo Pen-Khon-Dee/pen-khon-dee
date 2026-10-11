@@ -4,7 +4,22 @@ const cors = require('cors');
 const pool = require('./db');
 
 const app = express();
-app.use(cors());
+const corsOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+if (process.env.NODE_ENV === 'production' && corsOrigins.length === 0) {
+  throw new Error('CORS_ORIGINS must contain the deployed frontend URLs in production.');
+}
+
+app.use(cors(corsOrigins.length
+  ? {
+    origin(origin, callback) {
+      callback(null, !origin || corsOrigins.includes(origin));
+    },
+  }
+  : undefined));
 app.use(express.json());
 
 // Health check: confirms the backend is running and connected to the database

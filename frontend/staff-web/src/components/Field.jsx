@@ -6,9 +6,7 @@ export default function Field({ label, name, error, hint, as: Control = 'input',
 
   return (
     <div className="field">
-      <label className="field__label" htmlFor={id}>
-        {label}
-      </label>
+      <label className="field__label" htmlFor={id}>{label}</label>
       <Control
         id={id}
         name={name}
@@ -19,16 +17,18 @@ export default function Field({ label, name, error, hint, as: Control = 'input',
       >
         {children}
       </Control>
-      {hint && (
-        <p className="field__hint" id={`${id}-hint`}>
-          {hint}
-        </p>
-      )}
-      {error && (
-        <p className="field__error" id={`${id}-error`}>
-          {error}
-        </p>
-      )}
+      {hint && <p className="field__hint" id={`${id}-hint`}>{hint}</p>}
+      {error && <p className="field__error" id={`${id}-error`}>{error}</p>}
     </div>
+  );
+}
+
+// ฟอร์มที่ใช้ label ครอบ input (ใช้ในหน้า admin)
+export function Labeled({ label, children }) {
+  return (
+    <label className="field">
+      <span className="field__label">{label}</span>
+      {children}
+    </label>
   );
 }

@@ -42,6 +42,16 @@ export function getAdminSession(token) {
   return request('/auth/me', { token });
 }
 
+export function getKitchenBoard(token) {
+  return request('/kitchen/board', { token });
+}
+
+export function setOrderItemStatus(id, item_status, token) {
+  return request(`/order-items/${id}`, {
+    method: 'PATCH', body: { item_status }, token,
+  });
+}
+
 export function getAdminCategories(token) {
   return request('/categories', { token });
 }
