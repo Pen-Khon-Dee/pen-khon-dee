@@ -125,7 +125,8 @@ button { cursor: pointer; }
 .line__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .line__name { font-weight: 500; font-size: 15px; line-height: 1.35; }
 .line__sub { font-size: 13px; color: var(--muted); }
-.line__note { width: 100%; margin-top: 10px; min-height: 38px; padding: 0 10px; background: var(--paper); border: 1px solid transparent; border-radius: 6px; font-size: 14px; }
+.line__note-label { display: block; margin-top: 10px; color: var(--muted); font-size: 12px; }
+.line__note { width: 100%; margin-top: 4px; min-height: 54px; padding: 8px 10px; resize: vertical; background: var(--paper); border: 1px solid transparent; border-radius: 6px; font: inherit; font-size: 14px; }
 .line__note:focus { outline: none; border-color: var(--pine); background: var(--surface); }
 .line__note::placeholder { color: #a39e95; }
 .line__total { margin-top: 8px; text-align: right; font-size: 14px; font-variant-numeric: tabular-nums; }

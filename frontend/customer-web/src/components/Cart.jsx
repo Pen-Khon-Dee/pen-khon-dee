@@ -39,13 +39,17 @@ export default function Cart({
                       <button type="button" onClick={() => onQuantity(item, 1)} aria-label={`Add one ${item.menu_name}`}>+</button>
                     </div>
                   </div>
-                  <input
+                  <label className="line__note-label" htmlFor={`note-${item.menu_id}`}>
+                    Special instructions for this dish
+                  </label>
+                  <textarea
+                    id={`note-${item.menu_id}`}
                     className="line__note"
                     value={item.note}
                     maxLength={255}
+                    rows={2}
                     onChange={(e) => onNote(item.menu_id, e.target.value)}
-                    placeholder="Note for the kitchen"
-                    aria-label={`Note for ${item.menu_name}`}
+                    placeholder="e.g. no spice, no cilantro"
                   />
                   <p className="line__total">{baht(Number(item.price) * item.quantity)}</p>
                 </li>
