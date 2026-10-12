@@ -1,4 +1,4 @@
-Columnscustomerscustomersemployees-- =====================================================================
+-- =====================================================================
 -- Pen Khon Dee : Restaurant Front-of-House Management System
 -- Schema.sql  (MySQL 8.0.16+)
 -- Creates the database and all 13 tables
