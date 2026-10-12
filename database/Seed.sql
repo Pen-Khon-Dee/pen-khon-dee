@@ -142,12 +142,9 @@ INSERT INTO point_transaction (member_id, order_id, points, type, transaction_da
 -- =====================================================================
 
 -- Report 1: which tables are free now + time seated + reservations in the next 4 hours
-SELECT t.table_number,
-       t.table_status,
-       TIMESTAMPDIFF(MINUTE, oo.order_datetime, NOW()) AS minutes_seated,
-       oo.order_datetime + INTERVAL 4 HOUR             AS should_leave_at,
-       (SELECT MIN(r.reservation_datetime)
-          FROM reservation r
+SELECT t.table_number, t.table_status,TIMESTAMPDIFF(MINUTE, oo.order_datetime, NOW()) AS minutes_seated,
+  oo.order_datetime + INTERVAL 4 HOUR AS should_leave_at,(SELECT MIN(r.reservation_datetime)
+  FROM reservation r
           JOIN reservation_table rt ON rt.reservation_id = r.reservation_id
          WHERE rt.table_id = t.table_id
            AND r.reservation_status = 'Confirmed'

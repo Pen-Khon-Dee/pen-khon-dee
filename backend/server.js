@@ -20,13 +20,6 @@ app.get('/api/health', async (req, res, next) => {
   }
 });
 
-// Customer ordering page: the link each table's QR code points to.
-// Open http://localhost:3000/order/<table qr_token> to order as that table's customer.
-const path = require('path');
-app.get('/order/:token', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'order.html'));
-});
-
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tables', require('./routes/tables'));
