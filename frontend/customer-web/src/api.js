@@ -2,6 +2,7 @@ const BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 
 async function request(path, { method = 'GET', body } = {}) {
   let response;
+
   try {
     response = await fetch(`${BASE}${path}`, {
       method,
@@ -13,33 +14,46 @@ async function request(path, { method = 'GET', body } = {}) {
   }
 
   let data;
+
   try {
     data = await response.json();
   } catch {
     throw new Error('The ordering service returned an invalid response.');
   }
-  if (!response.ok) throw new Error(data.error || 'Unable to complete your request.');
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Unable to complete your request.');
+  }
+
   return data;
 }
 
 export function getCustomerMenu() {
-  return request('/customer/menu');
+  return request('/menu/public');
 }
 
 export function getAvailableTables() {
-  return request('/customer/tables');
+  return request('/qr/tables');
 }
 
-export function createCustomerOrder(table_number, items) {
-  return request('/customer/orders', {
+export function getTableMenu(token) {
+  return request(`/qr/${encodeURIComponent(token)}/menu`);
+}
+
+export function getCustomerOrder(token) {
+  return request(`/qr/${encodeURIComponent(token)}`);
+}
+
+export function createCustomerOrder(qr_token, items) {
+  return request(`/qr/${encodeURIComponent(qr_token)}/items`, {
     method: 'POST',
-    body: { table_number, items },
+    body: { items },
   });
 }
 
 export function addCustomerOrderItems(order, items) {
-  return request(`/customer/orders/${order.order_id}/items`, {
+  return request(`/qr/${encodeURIComponent(order.qr_token)}/items`, {
     method: 'POST',
-    body: { access_token: order.access_token, items },
+    body: { items },
   });
 }
