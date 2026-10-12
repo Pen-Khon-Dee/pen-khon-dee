@@ -11,7 +11,8 @@ app.use(express.json());
 app.get('/api/health', async (req, res, next) => {
   try {
     const [rows] = await pool.query(
-      'SELECT COUNT(*) AS tables, NOW() AS db_time FROM dining_table'
+      // time_zone should be +07:00 (Thai time). If it shows SYSTEM or UTC, db.js is out of date.
+      'SELECT COUNT(*) AS tables, NOW() AS db_time, @@session.time_zone AS time_zone FROM dining_table'
     );
     res.json({ status: 'ok', ...rows[0] });
   } catch (err) {
