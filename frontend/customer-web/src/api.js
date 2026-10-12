@@ -1,3 +1,4 @@
+
 const BASE = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 
 async function request(path, { method = 'GET', body } = {}) {
@@ -28,8 +29,16 @@ async function request(path, { method = 'GET', body } = {}) {
   return data;
 }
 
-export function getCustomerMenu() {
-  return request('/menu/public');
+export async function getCustomerMenu() {
+  const categories = await request('/menu/public');
+
+  return categories.flatMap((category) =>
+    category.items.map((item) => ({
+      ...item,
+      category_id: category.category_id,
+      category_name: category.category_name,
+    }))
+  );
 }
 
 export function getAvailableTables() {
