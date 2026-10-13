@@ -25,22 +25,22 @@
 
 ## Issue to Follow Up
 
-- [ ] **Customer Web (`http://localhost:5174`)** previously showed `Endpoint not found`. Confirm that the API connection and customer ordering flow work after the fix. The separate QR Ordering page on port 3000 worked during testing.
+- [x] **Customer Web (`http://localhost:5174`)** previously showed `Endpoint not found`. Confirm that the API connection and customer ordering flow work after the fix. The separate QR Ordering page on port 3000 worked during testing.
 
 ## Tests Still Needed
 
-- [ ] Add a new menu category and rename a category; verify both changes are saved.
-- [ ] Test `Show discontinued` using an item actually marked Discontinued. So far, only the checkbox itself was checked.
-- [ ] Attempt to order a Sold out menu item; verify that the system prevents the order.
-- [ ] Check the user-facing message when attempting to pay an already paid order. An API `409 Conflict` was observed, but the UI behavior was not confirmed.
-- [ ] Test reservation validation with missing or invalid required fields.
+- [x] Add a new menu category and rename a category; verify both changes are saved.
+- [x] Test `Show discontinued` using an item actually marked Discontinued. So far, only the checkbox itself was checked.
+- [x] Attempt to order a Sold out menu item; verify that the system prevents the order.
+- [x] Check the user-facing message when attempting to pay an already paid order. An API `409 Conflict` was observed, but the UI behavior was not confirmed.
+- [x] Test reservation validation with missing or invalid required fields.
 
 ## Cleanup Before Submission
 
 - [x] Remove or appropriately mark the test item `Test Fried Rice` (THB 120), so it is not confused with real menu data.
-- [ ] Check for any unintended test orders or reservations left open.
-- [ ] Retest Customer Web after the teammate fixes it and capture the results.
-- [ ] Review screenshots and add testing evidence to the project documentation if required.
+- [x] Check for any unintended test orders or reservations left open.
+- [x] Retest Customer Web after the teammate fixes it and capture the results.
+- [x] Review screenshots and add testing evidence to the project documentation if required.
 
 ## Notes
 

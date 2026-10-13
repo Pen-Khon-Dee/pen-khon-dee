@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 import { baht } from '../lib/format';
 import Quantity from './Quantity';
@@ -6,10 +7,13 @@ const ALL = 'All';
 
 export default function MenuList({ menu, loading, category, onCategory, cart, onChange }) {
   const categories = useMemo(() => [ALL, ...new Set(menu.map((i) => i.category_name))], [menu]);
+
   const groups = useMemo(() => {
     const names = category === ALL ? categories.slice(1) : [category];
-    return names.map((name) => ({ name, items: menu.filter((i) => i.category_name === name) }))
-      .filter((g) => g.items.length);
+    return names.map((name) => ({
+      name,
+      items: menu.filter((i) => i.category_name === name),
+    })).filter((g) => g.items.length);
   }, [menu, categories, category]);
 
   return (
@@ -42,19 +46,33 @@ export default function MenuList({ menu, loading, category, onCategory, cart, on
                     <span className="dish__leader" aria-hidden="true" />
                     <span className="dish__price">{baht(item.price)}</span>
                   </div>
-                  <Quantity
-                    name={item.menu_name}
-                    quantity={cart[item.menu_id]?.quantity}
-                    onAdd={() => onChange(item, 1)}
-                    onChange={(delta) => onChange(item, delta)}
-                  />
+
+                  {item.availability_status === 'Sold_Out' ? (
+                    <span
+                      className="sold-out"
+                      aria-label={`${item.menu_name} is sold out`}
+                    >
+                      Sold out
+                    </span>
+                  ) : (
+                    <Quantity
+                      name={item.menu_name}
+                      quantity={cart[item.menu_id]?.quantity}
+                      onAdd={() => onChange(item, 1)}
+                      onChange={(delta) => onChange(item, delta)}
+                    />
+                  )}
                 </li>
               ))}
             </ul>
           </section>
         ))
       ) : (
-        <p className="empty">{menu.length ? 'Nothing in this category right now.' : 'The menu isn’t available right now.'}</p>
+        <p className="empty">
+          {menu.length
+            ? 'Nothing in this category right now.'
+            : 'The menu isn’t available right now.'}
+        </p>
       )}
     </section>
   );
