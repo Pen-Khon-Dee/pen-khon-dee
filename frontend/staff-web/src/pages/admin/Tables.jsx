@@ -71,7 +71,7 @@ export default function Tables() {
         <header className="page-head">
           <div>
             <h1 className="page-title">Tables</h1>
-            <p className="muted">{counts.busy} occupied · {counts.free} available · refreshes every 30 seconds</p>
+            <p className="muted">{counts.busy} occupied · {counts.free} available · refreshes every 10 seconds</p>
           </div>
           <button type="button" className="btn btn--ghost" onClick={() => loadTables().catch((e) => setError(e.message))}>Refresh</button>
         </header>
