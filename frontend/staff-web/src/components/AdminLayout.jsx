@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
-import { getAdminSession, getAdminTables } from '../api';
+import { getAdminSession, getAdminTableOrder, getAdminTables } from '../api';
 import { clearSession, readSession, saveSession } from '../lib/session';
 import Wordmark from './Wordmark';
 
@@ -35,12 +35,12 @@ export default function AdminLayout() {
   const loadTables = useCallback(async () => {
     setTables(await getAdminTables(token));
   }, [token]);
-
   // ครอบการเรียก API: เคลียร์ข้อความ, แสดง loading, จับ error
   const run = useCallback(async (fn) => {
     setError('');
     setNotice('');
     setLoading(true);
+
     try {
       return await fn();
     } catch (err) {
@@ -53,36 +53,79 @@ export default function AdminLayout() {
 
   useEffect(() => {
     if (!token) return undefined;
+
     let alive = true;
+
     (async () => {
       setLoading(true);
+
       try {
         const { employee } = await getAdminSession(token);
-        if (employee?.role !== 'Cashier') throw new Error('A Cashier account is required to access this dashboard.');
+
+        if (employee?.role !== 'Cashier') {
+          throw new Error(
+            'A Cashier account is required to access this dashboard.'
+          );
+        }
+
         if (!alive) return;
+
         const verified = { token, employee };
+
         saveSession(verified);
         setSession(verified);
+
         await loadTables();
       } catch (err) {
         if (!alive) return;
+
         clearSession();
         setAuthError(err.message);
         setSession(null);
       } finally {
-        if (alive) setLoading(false);
+        if (alive) {
+          setLoading(false);
+        }
       }
     })();
-    return () => { alive = false; };
+
+    return () => {
+      alive = false;
+    };
   }, [token, loadTables]);
 
+  // Refresh table list every 10 seconds
   useEffect(() => {
     if (!token) return undefined;
+
     const timer = window.setInterval(() => {
       loadTables().catch((err) => setError(err.message));
-    }, 30_000);
+    }, 10_000);
+
     return () => window.clearInterval(timer);
   }, [token, loadTables]);
+
+  // Refresh the currently opened bill every 5 seconds
+  useEffect(() => {
+    const tableNumber = bill?.table_numbers?.[0];
+
+    if (!token || !tableNumber || payment) {
+      return undefined;
+    }
+
+    const refreshBill = async () => {
+      try {
+        const freshBill = await getAdminTableOrder(tableNumber, token);
+        setBill(freshBill);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    const timer = window.setInterval(refreshBill, 5_000);
+
+    return () => window.clearInterval(timer);
+  }, [token, bill?.order_id, bill?.table_numbers?.[0], payment]);
 
   useEffect(() => {
     setError('');
@@ -99,52 +142,102 @@ export default function AdminLayout() {
       <Navigate
         to="/login"
         replace
-        state={{ message: authError || 'Please sign in with a Cashier account to continue.' }}
+        state={{
+          message:
+            authError ||
+            'Please sign in with a Cashier account to continue.',
+        }}
       />
     );
   }
 
   const ctx = {
-    token, tables, loadTables, bill, setBill, payment, setPayment,
-    loading, run, error, setError, notice, setNotice,
+    token,
+    tables,
+    loadTables,
+    bill,
+    setBill,
+    payment,
+    setPayment,
+    loading,
+    run,
+    error,
+    setError,
+    notice,
+    setNotice,
   };
 
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="sidebar__brand"><Wordmark /></div>
+        <div className="sidebar__brand">
+          <Wordmark />
+        </div>
+
         <nav className="nav" aria-label="Main">
           {NAV.map((item) => (
-            <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav__link${isActive ? ' is-active' : ''}`}>
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `nav__link${isActive ? ' is-active' : ''}`
+              }
+            >
               <Icon d={item.icon} />
               <span>{item.label}</span>
             </NavLink>
           ))}
         </nav>
+
         <div className="sidebar__user">
           <div>
             <p className="sidebar__name">{session.employee?.name}</p>
             <p className="sidebar__role">{session.employee?.role}</p>
           </div>
-          <button type="button" className="link-button" onClick={logout}>Sign out</button>
+
+          <button
+            type="button"
+            className="link-button"
+            onClick={logout}
+          >
+            Sign out
+          </button>
         </div>
       </aside>
 
       <div className="shell__body">
-        <div className={`progress${loading ? ' is-on' : ''}`} aria-hidden="true" />
+        <div
+          className={`progress${loading ? ' is-on' : ''}`}
+          aria-hidden="true"
+        />
+
         <main id="main" className="content">
           {error && (
             <div className="banner banner--error" role="alert">
               <span>{error}</span>
-              <button type="button" onClick={() => setError('')} aria-label="Dismiss">×</button>
+              <button
+                type="button"
+                onClick={() => setError('')}
+                aria-label="Dismiss"
+              >
+                ×
+              </button>
             </div>
           )}
+
           {notice && (
             <div className="banner banner--ok" role="status">
               <span>{notice}</span>
-              <button type="button" onClick={() => setNotice('')} aria-label="Dismiss">×</button>
+              <button
+                type="button"
+                onClick={() => setNotice('')}
+                aria-label="Dismiss"
+              >
+                ×
+              </button>
             </div>
           )}
+
           <Outlet context={ctx} />
         </main>
       </div>

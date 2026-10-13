@@ -1,8 +1,13 @@
+
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import {
-  createAdminCustomer, createAdminOrder, createAdminReservation,
-  getAdminReservations, setAdminReservationStatus,
+  cancelAdminOrder,
+  createAdminCustomer,
+  createAdminOrder,
+  createAdminReservation,
+  getAdminReservations,
+  setAdminReservationStatus,
 } from '../../api';
 import useCustomerSearch from '../../hooks/useCustomerSearch';
 import { formatTime, reservationStatusLabel, today } from '../../lib/format';
@@ -47,10 +52,12 @@ export default function Reservations() {
 
   const submit = (event) => {
     event.preventDefault();
+
     if (!search.customer || !tableIds.length) {
       setError('Find or add a customer and select at least one table.');
       return;
     }
+
     run(async () => {
       await createAdminReservation({
         customer_id: search.customer.customer_id,
@@ -58,12 +65,14 @@ export default function Reservations() {
         number_of_guests: Number(guests),
         table_ids: tableIds,
       }, token);
+
       search.reset();
       search.setPhone('');
       setNewName('');
       setNewEmail('');
       setTableIds([]);
       setFormOpen(false);
+
       await Promise.all([load(date), loadTables()]);
       setNotice('Reservation created.');
     });
@@ -73,23 +82,62 @@ export default function Reservations() {
     setBusyId(row.reservation_id);
     setError('');
     setNotice('');
+
     try {
-      const updated = await setAdminReservationStatus(row.reservation_id, status, token);
       if (status === 'Seated') {
-        const opened = await createAdminOrder(updated.table_ids, token);
+        // Open the bill before changing the reservation status.
+        const opened = await createAdminOrder(row.table_ids, token);
+
+        let updated;
+
+        try {
+          updated = await setAdminReservationStatus(
+            row.reservation_id,
+            status,
+            token
+          );
+        } catch (err) {
+          // Cancel the new bill if the reservation update fails.
+          try {
+            await cancelAdminOrder(opened.order_id, token);
+          } catch (rollbackError) {
+            throw new Error(
+              `${err.message}. Could not cancel order #${opened.order_id}: ${rollbackError.message}`
+            );
+          }
+          throw err;
+        }
+
         setBill(opened);
         setPayment(null);
-        await loadTables();
-        await load(date);
-        setNotice(`Reservation #${row.reservation_id} checked in. Opened a bill for table${updated.table_numbers.length === 1 ? '' : 's'} ${updated.table_numbers.join(', ')}.`);
+
+        await Promise.all([loadTables(), load(date)]);
+
+        setNotice(
+          `Reservation #${row.reservation_id} checked in. Opened a bill for table${updated.table_numbers.length === 1 ? '' : 's'} ${updated.table_numbers.join(', ')}.`
+        );
+
         navigate('/admin/tables');
         return;
       }
+
+      await setAdminReservationStatus(
+        row.reservation_id,
+        status,
+        token
+      );
+
       await load(date);
       setNotice(`Reservation #${row.reservation_id} updated.`);
     } catch (err) {
       setError(err.message);
-      await Promise.all([load(date), loadTables()]).catch((e) => setError(`${err.message} · Refresh failed: ${e.message}`));
+
+      await Promise.all([
+        load(date),
+        loadTables(),
+      ]).catch((e) =>
+        setError(`${err.message} · Refresh failed: ${e.message}`)
+      );
     } finally {
       setBusyId(null);
     }
@@ -102,9 +150,19 @@ export default function Reservations() {
         <div className="page-head__actions">
           <label className="date-pick">
             <span className="sr-only">Date</span>
-            <input className="field__control" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <input
+              className="field__control"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
           </label>
-          <button type="button" className="btn btn--primary" onClick={() => setFormOpen((v) => !v)} aria-expanded={formOpen}>
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => setFormOpen((v) => !v)}
+            aria-expanded={formOpen}
+          >
             {formOpen ? 'Close' : 'New reservation'}
           </button>
         </div>
@@ -113,36 +171,117 @@ export default function Reservations() {
       {formOpen && (
         <form className="card form" onSubmit={submit}>
           <h2 className="card__title">New reservation</h2>
+
           <div className="inline-form">
             <Labeled label="Customer phone number">
-              <input className="field__control" type="tel" value={search.phone} onChange={(e) => search.changePhone(e.target.value)} required />
+              <input
+                className="field__control"
+                type="tel"
+                value={search.phone}
+                onChange={(e) => search.changePhone(e.target.value)}
+                required
+              />
             </Labeled>
-            <button type="button" className="btn btn--ghost" disabled={loading} onClick={search.search}>Find customer</button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              disabled={loading}
+              onClick={search.search}
+            >
+              Find customer
+            </button>
           </div>
-          {search.customer && <p className="chip-line">{search.customer.name} · {search.customer.phone}</p>}
+
+          {search.customer && (
+            <p className="chip-line">
+              {search.customer.name} · {search.customer.phone}
+            </p>
+          )}
+
           {search.notFound && (
             <div className="subform">
-              <p className="muted">No customer with this number. Add their details first.</p>
-              <Labeled label="Name"><input className="field__control" value={newName} onChange={(e) => setNewName(e.target.value)} /></Labeled>
-              <Labeled label="Email (optional)"><input className="field__control" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} /></Labeled>
-              <button type="button" className="btn btn--ghost" disabled={loading || !newName.trim()} onClick={addCustomer}>Add customer</button>
+              <p className="muted">
+                No customer with this number. Add their details first.
+              </p>
+              <Labeled label="Name">
+                <input
+                  className="field__control"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                />
+              </Labeled>
+              <Labeled label="Email (optional)">
+                <input
+                  className="field__control"
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                />
+              </Labeled>
+              <button
+                type="button"
+                className="btn btn--ghost"
+                disabled={loading || !newName.trim()}
+                onClick={addCustomer}
+              >
+                Add customer
+              </button>
             </div>
           )}
+
           <div className="grid-3">
-            <Labeled label="Date"><input className="field__control" type="date" min={today()} value={bookingDate} onChange={(e) => setBookingDate(e.target.value)} required /></Labeled>
-            <Labeled label="Time"><input className="field__control" type="time" value={bookingTime} onChange={(e) => setBookingTime(e.target.value)} required /></Labeled>
-            <Labeled label="Guests"><input className="field__control" type="number" min="1" max="255" value={guests} onChange={(e) => setGuests(e.target.value)} required /></Labeled>
+            <Labeled label="Date">
+              <input
+                className="field__control"
+                type="date"
+                min={today()}
+                value={bookingDate}
+                onChange={(e) => setBookingDate(e.target.value)}
+                required
+              />
+            </Labeled>
+            <Labeled label="Time">
+              <input
+                className="field__control"
+                type="time"
+                value={bookingTime}
+                onChange={(e) => setBookingTime(e.target.value)}
+                required
+              />
+            </Labeled>
+            <Labeled label="Guests">
+              <input
+                className="field__control"
+                type="number"
+                min="1"
+                max="255"
+                value={guests}
+                onChange={(e) => setGuests(e.target.value)}
+                required
+              />
+            </Labeled>
           </div>
+
           <fieldset className="picker">
             <legend>Tables</legend>
             {tables.map((table) => {
               const on = tableIds.includes(table.table_id);
+
               return (
-                <label key={table.table_id} className={`picker__item${on ? ' is-on' : ''}`}>
+                <label
+                  key={table.table_id}
+                  className={`picker__item${on ? ' is-on' : ''}`}
+                >
                   <input
                     type="checkbox"
                     checked={on}
-                    onChange={() => setTableIds((cur) => (on ? cur.filter((id) => id !== table.table_id) : [...cur, table.table_id]))}
+                    onChange={() =>
+                      setTableIds((cur) =>
+                        on
+                          ? cur.filter((id) => id !== table.table_id)
+                          : [...cur, table.table_id]
+                      )
+                    }
                   />
                   <b>{table.table_number}</b>
                   <span>{table.capacity} seats</span>
@@ -150,7 +289,14 @@ export default function Reservations() {
               );
             })}
           </fieldset>
-          <button type="submit" className="btn btn--primary" disabled={loading || !search.customer || !tableIds.length}>Create reservation</button>
+
+          <button
+            type="submit"
+            className="btn btn--primary"
+            disabled={loading || !search.customer || !tableIds.length}
+          >
+            Create reservation
+          </button>
         </form>
       )}
 
@@ -158,30 +304,68 @@ export default function Reservations() {
         {rows.map((row) => {
           const confirmed = row.reservation_status === 'Confirmed';
           const late = confirmed && row.late_minutes > 0;
+
           return (
             <li className="row" key={row.reservation_id}>
-              <span className="row__time">{formatTime(row.reservation_datetime)}</span>
+              <span className="row__time">
+                {formatTime(row.reservation_datetime)}
+              </span>
+
               <div className="row__main">
-                <p className="row__title">{row.customer?.name || 'No name'}</p>
+                <p className="row__title">
+                  {row.customer?.name || 'No name'}
+                </p>
                 <p className="muted">
                   {row.customer?.phone || '—'} · {row.number_of_guests} guests · Table {row.table_numbers?.join(', ') || '—'}
                 </p>
-                {late && <p className={row.late_minutes > 30 ? 'late is-overdue' : 'late'}>{row.late_minutes} min late</p>}
+                {late && (
+                  <p className={row.late_minutes > 30 ? 'late is-overdue' : 'late'}>
+                    {row.late_minutes} min late
+                  </p>
+                )}
               </div>
-              <span className={`status ${confirmed ? 'is-ok' : 'is-muted'}`}>{reservationStatusLabel(row.reservation_status)}</span>
+
+              <span className={`status ${confirmed ? 'is-ok' : 'is-muted'}`}>
+                {reservationStatusLabel(row.reservation_status)}
+              </span>
+
               {confirmed && (
                 <div className="row__actions">
-                  <button type="button" className="btn btn--primary btn--sm" disabled={busyId === row.reservation_id} onClick={() => change(row, 'Seated')}>Check in</button>
-                  <button type="button" className="btn btn--ghost btn--sm" disabled={busyId === row.reservation_id} onClick={() => change(row, 'Cancelled')}>Cancel</button>
+                  <button
+                    type="button"
+                    className="btn btn--primary btn--sm"
+                    disabled={busyId === row.reservation_id}
+                    onClick={() => change(row, 'Seated')}
+                  >
+                    Check in
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn--ghost btn--sm"
+                    disabled={busyId === row.reservation_id}
+                    onClick={() => change(row, 'Cancelled')}
+                  >
+                    Cancel
+                  </button>
                   {row.late_minutes > 30 && (
-                    <button type="button" className="btn btn--ghost btn--sm btn--danger" disabled={busyId === row.reservation_id} onClick={() => change(row, 'No-show')}>No-show</button>
+                    <button
+                      type="button"
+                      className="btn btn--ghost btn--sm btn--danger"
+                      disabled={busyId === row.reservation_id}
+                      onClick={() => change(row, 'No-show')}
+                    >
+                      No-show
+                    </button>
                   )}
                 </div>
               )}
             </li>
           );
         })}
-        {!rows.length && !loading && <li className="empty">No reservations on this date.</li>}
+
+        {!rows.length && !loading && (
+          <li className="empty">No reservations on this date.</li>
+        )}
       </ul>
     </div>
   );
