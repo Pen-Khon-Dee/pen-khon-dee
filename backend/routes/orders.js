@@ -36,7 +36,7 @@ router.post('/', requireAuth, requireRole('Cashier'), async (req, res, next) => 
       }
 
       const [result] = await conn.query(
-        'INSERT INTO orders (employee_id) VALUES (?)',
+        'INSERT INTO orders (employee_id, order_datetime) VALUES (?, NOW())',
         [req.user.employee_id]
       );
       const orderId = result.insertId;
@@ -171,7 +171,7 @@ router.post('/:id/pay', requireAuth, requireRole('Cashier'), async (req, res, ne
       const newPoints = member.current_points + points;
       if (points > 0) {
         await conn.query(
-          "INSERT INTO point_transaction (member_id, order_id, points, type) VALUES (?, ?, ?, 'Earn')",
+          "INSERT INTO point_transaction (member_id, order_id, points, type, transaction_date) VALUES (?, ?, ?, 'Earn', NOW())",
           [member.member_id, orderId, points]
         );
       }

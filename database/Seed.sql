@@ -1,7 +1,7 @@
 -- =====================================================================
 -- Pen Khon Dee : Seed.sql
 -- Sample data for testing (run after Schema.sql)
--- Dates use NOW() / CURDATE() so the data is current every time it is run
+-- Dates use NOW() / CURRENT_DATE so the data is current every time it is run
 -- Amounts and points follow the business rules (10 baht = 1 point)
 -- =====================================================================
 USE pen_khon_dee;
@@ -24,19 +24,18 @@ INSERT INTO customer (customer_id, name, phone, email) VALUES
 
 -- 4 members (current_points = sum of their point_transaction rows)
 INSERT INTO member (member_id, customer_id, level_id, current_points, join_date) VALUES
-(1, 1, 1,  80, CURDATE() - INTERVAL 30 DAY),
-(2, 2, 3, 343, CURDATE() - INTERVAL 60 DAY),
-(3, 3, 1,  20, CURDATE() - INTERVAL 20 DAY),
-(4, 4, 1,   0, CURDATE());
+(1, 1, 1,  80, CURRENT_DATE - INTERVAL 30 DAY),
+(2, 2, 3, 343, CURRENT_DATE - INTERVAL 60 DAY),
+(3, 3, 1,  20, CURRENT_DATE - INTERVAL 20 DAY),
+(4, 4, 1,   0, CURRENT_DATE);
 
--- password_hash is a placeholder; run `npm run set-passwords` to set real bcrypt hashes
 INSERT INTO employee (employee_id, name, phone, username, email, password_hash, role, status) VALUES
 (1, 'Somsak Thongchai', '0891111001', 'cashier1', 'cashier1@penkhondee.com', 'SET_IN_STEP_3', 'Cashier', 'Active'),
 (2, 'Napa Wongsawat', '0891111002', 'cashier2', 'cashier2@penkhondee.com', 'SET_IN_STEP_3', 'Cashier', 'Active'),
 (3, 'Phum Rattanakul', '0891111003', 'server1',  'server1@penkhondee.com',  'SET_IN_STEP_3', 'Server',  'Active'),
 (4, 'Praew Siriwan', '0891111004', 'server2',  'server2@penkhondee.com',  'SET_IN_STEP_3', 'Server',  'Active'),
-(5, 'Ton Kaewmanee', '0891111005', 'server3',  'server3@penkhondee.com',  'SET_IN_STEP_3', 'Server',  'Inactive'),  -- has resigned
-(6, 'Kitchen Screen', NULL,       'kitchen1', 'kitchen1@penkhondee.com', 'SET_IN_STEP_3', 'Kitchen', 'Active');    -- shared account for the kitchen display
+(5, 'Ton Kaewmanee', '0891111005', 'server3',  'server3@penkhondee.com',  'SET_IN_STEP_3', 'Server',  'Inactive'), 
+(6, 'Kitchen Screen', NULL,       'kitchen1', 'kitchen1@penkhondee.com', 'SET_IN_STEP_3', 'Kitchen', 'Active');   
 
 -- 10 tables: 2, 4, 7, 8 are occupied (matching the Open orders below)
 -- qr_token is the permanent secret printed in each table's QR code (GET /api/tables shows them)
@@ -78,12 +77,12 @@ INSERT INTO menu (menu_id, category_id, menu_name, price, availability_status) V
 
 -- Reservations: one of every status
 INSERT INTO reservation (reservation_id, customer_id, employee_id, reservation_datetime, number_of_guests, reservation_status) VALUES
-(1, 5, 1, CURDATE() - INTERVAL 1 DAY + INTERVAL 18 HOUR,                       2, 'Seated'),
-(2, 7, 2, CURDATE() - INTERVAL 2 DAY + INTERVAL 19 HOUR,                       4, 'No-show'),
-(3, 8, 1, CURDATE() + INTERVAL 1 DAY + INTERVAL 12 HOUR,                       3, 'Cancelled'),
+(1, 5, 1, CURRENT_DATE - INTERVAL 1 DAY + INTERVAL 18 HOUR,                       2, 'Seated'),
+(2, 7, 2, CURRENT_DATE - INTERVAL 2 DAY + INTERVAL 19 HOUR,                       4, 'No-show'),
+(3, 8, 1, CURRENT_DATE + INTERVAL 1 DAY + INTERVAL 12 HOUR,                       3, 'Cancelled'),
 (4, 1, 2, NOW() + INTERVAL 1 HOUR,                                             4, 'Confirmed'),  -- table 5 will show a warning
-(5, 2, 1, CURDATE() + INTERVAL 1 DAY + INTERVAL 19 HOUR,                      10, 'Confirmed'),  -- booking across 2 tables
-(6, 3, 2, CURDATE() + INTERVAL 1 DAY + INTERVAL 12 HOUR + INTERVAL 30 MINUTE,  2, 'Confirmed');
+(5, 2, 1, CURRENT_DATE + INTERVAL 1 DAY + INTERVAL 19 HOUR,                      10, 'Confirmed'),  -- booking across 2 tables
+(6, 3, 2, CURRENT_DATE + INTERVAL 1 DAY + INTERVAL 12 HOUR + INTERVAL 30 MINUTE,  2, 'Confirmed');
 
 INSERT INTO reservation_table (reservation_id, table_id) VALUES
 (1, 1), (2, 3), (3, 6), (4, 5), (5, 9), (5, 10), (6, 1);
@@ -97,7 +96,7 @@ INSERT INTO orders (order_id, customer_id, employee_id, order_datetime, order_st
 (5,  2,    1, NOW() - INTERVAL 3 DAY,   'Closed', 'Paid',  43.70,  830.30),  -- Silver 5%
 (6,  3,    2, NOW() - INTERVAL 2 DAY,   'Closed', 'Paid',   0.00,  208.00),
 (7,  1,    1, NOW() - INTERVAL 1 DAY,   'Closed', 'Paid',   0.00,  485.00),
-(8,  5,    2, CURDATE() - INTERVAL 1 DAY + INTERVAL 18 HOUR + INTERVAL 5 MINUTE,
+(8,  5,    2, CURRENT_DATE - INTERVAL 1 DAY + INTERVAL 18 HOUR + INTERVAL 5 MINUTE,
                                         'Closed', 'Paid',   0.00,  168.00),  -- from reservation #1, not a member
 (9,  NULL, 1, NOW() - INTERVAL 50 MINUTE,  'Open', 'Unpaid', 0.00,  233.00),  -- normal
 (10, 4,    2, NOW() - INTERVAL 230 MINUTE, 'Open', 'Unpaid', 0.00,  238.00),  -- almost out of time (yellow)
@@ -109,24 +108,24 @@ INSERT INTO order_table (order_id, table_id) VALUES
 (9, 2), (10, 4),
 (11, 7), (11, 8);          -- combined tables
 
--- subtotal is omitted because it is a generated column
-INSERT INTO order_item (order_id, menu_id, quantity, unit_price, item_status, note) VALUES
-(1, 3, 4,  99.00, 'Served', NULL), (1, 5, 2, 129.00, 'Served', NULL), (1, 13, 3, 99.00, 'Served', NULL),
-(1, 9, 6,  45.00, 'Served', NULL), (1, 7, 2, 109.00, 'Served', NULL),
-(2, 1, 4,  89.00, 'Served', NULL), (2, 6, 3,  79.00, 'Served', NULL), (2, 10, 4, 50.00, 'Served', NULL),
-(2, 14, 4, 59.00, 'Served', NULL), (2, 8, 3,  69.00, 'Served', 'No peanuts'),
-(3, 2, 2,  69.00, 'Served', 'Less spicy'), (3, 9, 2, 45.00, 'Served', NULL), (3, 15, 2, 49.00, 'Served', NULL),
-(4, 3, 1,  99.00, 'Served', NULL), (4, 11, 1, 15.00, 'Served', NULL),
-(5, 5, 2, 129.00, 'Served', NULL), (5, 7, 2, 109.00, 'Served', NULL), (5, 13, 2, 99.00, 'Served', NULL),
-(5, 16, 2, 55.00, 'Served', NULL), (5, 9, 2,  45.00, 'Served', NULL),
-(6, 8, 1,  69.00, 'Served', NULL), (6, 1, 1,  89.00, 'Served', NULL), (6, 10, 1, 50.00, 'Served', NULL),
-(7, 3, 2,  99.00, 'Served', NULL), (7, 6, 1,  79.00, 'Served', NULL), (7, 9, 2,  45.00, 'Served', NULL),
-(7, 14, 2, 59.00, 'Served', NULL),
-(8, 2, 2,  69.00, 'Served', NULL), (8, 11, 2, 15.00, 'Served', NULL),
-(9, 1, 1,  89.00, 'Served',  NULL), (9, 9, 1, 45.00, 'Served', NULL), (9, 13, 1, 99.00, 'Ready', NULL),
-(10, 2, 2, 69.00, 'Served',  NULL), (10, 4, 1, 59.00, 'Cancelled', 'Sold out after ordering'),
-(10, 10, 2, 50.00, 'Served', NULL),
-(11, 5, 1, 129.00, 'Served', NULL), (11, 7, 1, 109.00, 'Pending', NULL), (11, 9, 3, 45.00, 'Served', NULL);
+-- subtotal = quantity * unit_price (checked by chk_item_subtotal)
+INSERT INTO order_item (order_id, menu_id, quantity, unit_price, subtotal, item_status, note) VALUES
+(1, 3, 4, 99.00, 396.00, 'Served', NULL), (1, 5, 2, 129.00, 258.00, 'Served', NULL), (1, 13, 3, 99.00, 297.00, 'Served', NULL),
+(1, 9, 6, 45.00, 270.00, 'Served', NULL), (1, 7, 2, 109.00, 218.00, 'Served', NULL),
+(2, 1, 4, 89.00, 356.00, 'Served', NULL), (2, 6, 3, 79.00, 237.00, 'Served', NULL), (2, 10, 4, 50.00, 200.00, 'Served', NULL),
+(2, 14, 4, 59.00, 236.00, 'Served', NULL), (2, 8, 3, 69.00, 207.00, 'Served', 'No peanuts'),
+(3, 2, 2, 69.00, 138.00, 'Served', 'Less spicy'), (3, 9, 2, 45.00, 90.00, 'Served', NULL), (3, 15, 2, 49.00, 98.00, 'Served', NULL),
+(4, 3, 1, 99.00, 99.00, 'Served', NULL), (4, 11, 1, 15.00, 15.00, 'Served', NULL),
+(5, 5, 2, 129.00, 258.00, 'Served', NULL), (5, 7, 2, 109.00, 218.00, 'Served', NULL), (5, 13, 2, 99.00, 198.00, 'Served', NULL),
+(5, 16, 2, 55.00, 110.00, 'Served', NULL), (5, 9, 2, 45.00, 90.00, 'Served', NULL),
+(6, 8, 1, 69.00, 69.00, 'Served', NULL), (6, 1, 1, 89.00, 89.00, 'Served', NULL), (6, 10, 1, 50.00, 50.00, 'Served', NULL),
+(7, 3, 2, 99.00, 198.00, 'Served', NULL), (7, 6, 1, 79.00, 79.00, 'Served', NULL), (7, 9, 2, 45.00, 90.00, 'Served', NULL),
+(7, 14, 2, 59.00, 118.00, 'Served', NULL),
+(8, 2, 2, 69.00, 138.00, 'Served', NULL), (8, 11, 2, 15.00, 30.00, 'Served', NULL),
+(9, 1, 1, 89.00, 89.00, 'Served',  NULL), (9, 9, 1, 45.00, 45.00, 'Served', NULL), (9, 13, 1, 99.00, 99.00, 'Ready', NULL),
+(10, 2, 2, 69.00, 138.00, 'Served',  NULL), (10, 4, 1, 59.00, 59.00, 'Cancelled', 'Sold out after ordering'),
+(10, 10, 2, 50.00, 100.00, 'Served', NULL),
+(11, 5, 1, 129.00, 129.00, 'Served', NULL), (11, 7, 1, 109.00, 109.00, 'Pending', NULL), (11, 9, 3, 45.00, 135.00, 'Served', NULL);
 
 -- points = floor(total_amount / 10), only for Paid orders of members
 INSERT INTO point_transaction (member_id, order_id, points, type, transaction_date) VALUES
@@ -141,21 +140,14 @@ INSERT INTO point_transaction (member_id, order_id, points, type, transaction_da
 -- Checks to run afterwards (each query can be executed on its own)
 -- =====================================================================
 
--- Report 1: which tables are free now + time seated + reservations in the next 4 hours
-SELECT t.table_number, t.table_status,TIMESTAMPDIFF(MINUTE, oo.order_datetime, NOW()) AS minutes_seated,
-  oo.order_datetime + INTERVAL 4 HOUR AS should_leave_at,(SELECT MIN(r.reservation_datetime)
-  FROM reservation r
-          JOIN reservation_table rt ON rt.reservation_id = r.reservation_id
-         WHERE rt.table_id = t.table_id
-           AND r.reservation_status = 'Confirmed'
-           AND r.reservation_datetime BETWEEN NOW() AND NOW() + INTERVAL 4 HOUR
-       ) AS upcoming_reservation
-FROM dining_table t
-LEFT JOIN (SELECT ot.table_id, o.order_datetime
-             FROM order_table ot
-             JOIN orders o ON o.order_id = ot.order_id
-            WHERE o.order_status = 'Open') oo ON oo.table_id = t.table_id
-ORDER BY t.table_number;
+-- Report 1: upcoming Confirmed reservations and the tables they hold
+SELECT r.reservation_id, c.name, r.reservation_datetime, r.number_of_guests, t.table_number
+FROM reservation r
+JOIN customer c          ON c.customer_id = r.customer_id
+JOIN reservation_table rt ON rt.reservation_id = r.reservation_id
+JOIN dining_table t      ON t.table_id = rt.table_id
+WHERE r.reservation_status = 'Confirmed'
+ORDER BY r.reservation_datetime, t.table_number;
 
 -- Report 2: items on table 4's order
 SELECT m.menu_name, oi.quantity, oi.unit_price, oi.subtotal, oi.item_status, oi.note
@@ -167,17 +159,25 @@ JOIN menu m         ON m.menu_id = oi.menu_id
 WHERE t.table_number = 4;
 
 -- Report 3: payment status of occupied tables
-SELECT t.table_number, o.order_id, o.payment_status, o.total_amount
+SELECT t.table_number, o.order_id, o.order_datetime, o.payment_status, o.total_amount
 FROM dining_table t
 JOIN order_table ot ON ot.table_id = t.table_id
 JOIN orders o       ON o.order_id = ot.order_id
 WHERE o.order_status = 'Open'
 ORDER BY t.table_number;
 
--- Integrity check: current_points must equal the sum of points (ok must be 1 on every row)
-SELECT m.member_id, m.current_points,
-       COALESCE(SUM(pt.points), 0) AS sum_points,
-       m.current_points = COALESCE(SUM(pt.points), 0) AS ok
+-- Report 4: best-selling menu items (paid orders, cancelled items not counted)
+SELECT m.menu_name, SUM(oi.quantity) AS units_sold, SUM(oi.subtotal) AS revenue
+FROM order_item oi
+JOIN menu m   ON m.menu_id = oi.menu_id
+JOIN orders o ON o.order_id = oi.order_id
+WHERE o.payment_status = 'Paid' AND oi.item_status <> 'Cancelled'
+GROUP BY m.menu_id, m.menu_name
+ORDER BY revenue DESC
+LIMIT 5;
+
+SELECT m.member_id, m.current_points, SUM(pt.points) AS sum_points
 FROM member m
-LEFT JOIN point_transaction pt ON pt.member_id = m.member_id
-GROUP BY m.member_id, m.current_points;
+JOIN point_transaction pt ON pt.member_id = m.member_id
+GROUP BY m.member_id, m.current_points
+HAVING m.current_points <> SUM(pt.points);

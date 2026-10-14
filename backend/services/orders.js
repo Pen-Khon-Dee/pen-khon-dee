@@ -156,8 +156,11 @@ async function addItems(conn, orderId, items) {
 
   // unit_price is copied from the menu now, so later price changes do not affect this bill
   await conn.query(
-    'INSERT INTO order_item (order_id, menu_id, quantity, unit_price, note) VALUES ?',
-    [items.map((i) => [orderId, i.menu_id, i.quantity, byId.get(i.menu_id).price, i.note?.trim() || null])]
+    'INSERT INTO order_item (order_id, menu_id, quantity, unit_price, subtotal, note) VALUES ?',
+    [items.map((i) => {
+      const price = Number(byId.get(i.menu_id).price);
+      return [orderId, i.menu_id, i.quantity, price, round2(i.quantity * price), i.note?.trim() || null];
+    })]
   );
   await recalcTotals(conn, orderId);
 }
