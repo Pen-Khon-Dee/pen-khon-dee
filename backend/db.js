@@ -13,8 +13,10 @@ function sslOptions() {
     };
   }
 
+  // No CA certificate given: the connection is still encrypted,
+  // but the server certificate is not checked (Aiven uses its own CA)
   return {
-    rejectUnauthorized: true,
+    rejectUnauthorized: false,
   };
 }
 
