@@ -1,7 +1,5 @@
-// Authentication and role checks, shared by every route
 const jwt = require('jsonwebtoken');
 
-// Requires login: reads the token from "Authorization: Bearer <token>"
 function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
@@ -18,7 +16,6 @@ function requireAuth(req, res, next) {
   }
 }
 
-// Restricts by role. Use after requireAuth, e.g. requireRole('Cashier')
 function requireRole(...roles) {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
